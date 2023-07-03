@@ -6,11 +6,22 @@ from itertools import islice
 import pickle
 MAX_KERNELS = 12 #maximum threads to run
 
-def generate_random_regular_graph(num_vertices, degree , seed = 0):
-    return nx.random_regular_graph(degree, num_vertices, seed=seed)
+def calculate_GDBG_edges(num_vertices, degree):
+
+    assert(num_vertices > degree)
+    # Create a list of edges
+    edges = []
+    
+    for v in range(num_vertices):
+        for e in range(degree):
+            if v != (degree*v+e)%num_vertices: #exclude self-loop arcs
+                edges.extend([(v, (degree*v+e)%num_vertices)])
+
+    return edges
 
 def calculate_k_shortest_paths(graph, v1, v2, k):
     return list( islice(nx.shortest_simple_paths(graph, v1, v2), k) )
+
 
 def calculate_all_k_shortest_path_length(graph, k):
     vertices = graph.nodes()
@@ -21,7 +32,7 @@ def calculate_all_k_shortest_path_length(graph, k):
     # Calculate the average k-shortest path lengths in parallel with custom progress bar
     progress = 0
     total = len(vertex_pairs)
-    print("Calculating shortest paths in RRG:")
+    print("Calculating shortest paths in GDBG:")
 
     # Custom progress bar update function
     def update_progress(future):
@@ -47,18 +58,17 @@ def calculate_all_k_shortest_path_length(graph, k):
     
     # Process the results and store k-shortest paths in a dictionary
     k_shortest_paths_dict = {}
-    average_lengths = {}
+    k_shortest_average_lengths = {}
     for i, (v1, v2) in enumerate(vertex_pairs):
         k_shortest_paths_dict[(v1, v2)] = results[i]
-        average_lengths[(v1, v2)] = sum(len(path) - 1 for path in results[i]) / k
+        k_shortest_average_lengths[(v1, v2)] = sum(len(path) - 1 for path in results[i])/k
 
-    return average_lengths, k_shortest_paths_dict
+    return k_shortest_average_lengths, k_shortest_paths_dict
 
 def distribute_flow_on_paths(edge_list, k_shortest_paths):
     link_loads = {}
     for u, v in edge_list:
         link_loads[(u, v)]=0
-        link_loads[(v, u)]=0
     for paths in k_shortest_paths.values():
         k = len(paths)
         for path in paths:
@@ -72,15 +82,23 @@ def distribute_flow_on_paths(edge_list, k_shortest_paths):
 
 # do calculations for one particular GDBG graph (discarded):
 def calculate_single_network(num_vertices, degree, k):
-    graph = generate_random_regular_graph(num_vertices, degree)
+    graph_edges = calculate_GDBG_edges(num_vertices, degree)
+    graph = nx.DiGraph()
+    graph.add_edges_from(graph_edges)
     k_shortest_average_lengths, k_shortest_paths = calculate_all_k_shortest_path_length(graph, k)
-    arc_loads = distribute_flow_on_paths(list(graph.edges()), k_shortest_paths)
+    arc_loads = distribute_flow_on_paths(graph.edges(), k_shortest_paths)
     return k_shortest_average_lengths, arc_loads
 
 # Calculations for one particular GDBG graph, pickle the graph and the calculated k-shortest paths:
-def pickle_single_network(num_vertices, degree, k):
-    graph = generate_random_regular_graph(num_vertices, degree)
-    pickle.dump(graph, open('RRG_({},{}).pickle'.format(num_vertices, degree), 'wb'))
+def pickle_single_network(num_vertices, degree, k, path=None):
+    graph_edges = calculate_GDBG_edges(num_vertices, degree)
+    graph = nx.DiGraph()
+    graph.add_edges_from(graph_edges)
+    
     _, k_shortest_paths = calculate_all_k_shortest_path_length(graph, k)
-    pickle.dump(k_shortest_paths, open('{}_shortest_paths_RRG_({},{}).pickle'.format(k,num_vertices, degree), 'wb'))
+    if path:
+        KeyError("not yet implemented")
+    else:
+        pickle.dump(k_shortest_paths, open('./pickled_data/{}_shortest_paths_GDBG_({},{}).pickle'.format(k,num_vertices, degree), 'wb'))
+        pickle.dump(graph, open('./pickled_data/GDBG_({},{}).pickle'.format(num_vertices, degree), 'wb'))
     return
