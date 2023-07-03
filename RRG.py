@@ -1,10 +1,10 @@
 import networkx as nx
 from concurrent.futures import ThreadPoolExecutor
+from joblib import Parallel, delayed
 import sys
 from itertools import islice
-MAX_KERNELS = 12
-
-from joblib import Parallel, delayed
+import pickle
+MAX_KERNELS = 12 #maximum threads to run
 
 def generate_random_regular_graph(num_vertices, degree , seed = 0):
     return nx.random_regular_graph(degree, num_vertices, seed=seed)
@@ -54,10 +54,9 @@ def calculate_all_k_shortest_path_length(graph, k):
 
     return average_lengths, k_shortest_paths_dict
 
-def distribute_flow_on_paths(graph, k_shortest_paths):
-    edges = list(graph.edges())
+def distribute_flow_on_paths(edge_list, k_shortest_paths):
     link_loads = {}
-    for u, v in edges:
+    for u, v in edge_list:
         link_loads[(u, v)]=0
         link_loads[(v, u)]=0
     for paths in k_shortest_paths.values():
@@ -71,10 +70,17 @@ def distribute_flow_on_paths(graph, k_shortest_paths):
 
 # small funtions above
 
-# do calculations for one particular GDBG graph:
+# do calculations for one particular GDBG graph (discarded):
 def calculate_single_network(num_vertices, degree, k):
     graph = generate_random_regular_graph(num_vertices, degree)
     k_shortest_average_lengths, k_shortest_paths = calculate_all_k_shortest_path_length(graph, k)
-    arc_loads = distribute_flow_on_paths(graph, k_shortest_paths)
-
+    arc_loads = distribute_flow_on_paths(list(graph.edges()), k_shortest_paths)
     return k_shortest_average_lengths, arc_loads
+
+# Calculations for one particular GDBG graph, pickle the graph and the calculated k-shortest paths:
+def pickle_single_network(num_vertices, degree, k):
+    graph = generate_random_regular_graph(num_vertices, degree)
+    pickle.dump(graph, open('RRG_({},{}).pickle'.format(num_vertices, degree), 'wb'))
+    _, k_shortest_paths = calculate_all_k_shortest_path_length(graph, k)
+    pickle.dump(k_shortest_paths, open('{}_shortest_paths_RRG_({},{}).pickle'.format(k,num_vertices, degree), 'wb'))
+    return

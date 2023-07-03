@@ -3,7 +3,8 @@ from concurrent.futures import ThreadPoolExecutor
 from joblib import Parallel, delayed
 import sys
 from itertools import islice
-MAX_KERNELS = 12
+import pickle
+MAX_KERNELS = 12 #maximum threads to run
 
 def calculate_GDBG_edges(num_vertices, degree):
 
@@ -64,9 +65,9 @@ def calculate_all_k_shortest_path_length(graph, k):
 
     return k_shortest_average_lengths, k_shortest_paths_dict
 
-def distribute_flow_on_paths(graph, k_shortest_paths):
+def distribute_flow_on_paths(edge_list, k_shortest_paths):
     link_loads = {}
-    for u, v in graph.edges():
+    for u, v in edge_list:
         link_loads[(u, v)]=0
     for paths in k_shortest_paths.values():
         k = len(paths)
@@ -79,12 +80,21 @@ def distribute_flow_on_paths(graph, k_shortest_paths):
 
 # small funtions above
 
-# do calculations for one particular GDBG graph:
+# do calculations for one particular GDBG graph (discarded):
 def calculate_single_network(num_vertices, degree, k):
     graph_edges = calculate_GDBG_edges(num_vertices, degree)
     graph = nx.DiGraph()
     graph.add_edges_from(graph_edges)
     k_shortest_average_lengths, k_shortest_paths = calculate_all_k_shortest_path_length(graph, k)
-    arc_loads = distribute_flow_on_paths(graph, k_shortest_paths)
-
+    arc_loads = distribute_flow_on_paths(graph.edges(), k_shortest_paths)
     return k_shortest_average_lengths, arc_loads
+
+# Calculations for one particular GDBG graph, pickle the graph and the calculated k-shortest paths:
+def pickle_single_network(num_vertices, degree, k):
+    graph_edges = calculate_GDBG_edges(num_vertices, degree)
+    graph = nx.DiGraph()
+    graph.add_edges_from(graph_edges)
+    pickle.dump(graph, open('GDBG_({},{}).pickle'.format(num_vertices, degree), 'wb'))
+    _, k_shortest_paths = calculate_all_k_shortest_path_length(graph, k)
+    pickle.dump(k_shortest_paths, open('{}_shortest_paths_GDBG_({},{}).pickle'.format(k,num_vertices, degree), 'wb'))
+    return
