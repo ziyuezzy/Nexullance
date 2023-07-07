@@ -65,12 +65,12 @@ def calculate_all_k_shortest_path_length(graph, k):
 
     return k_shortest_average_lengths, k_shortest_paths_dict
 
-def distribute_flow_on_paths(edge_list, k_shortest_paths):
+def distribute_flow_on_paths(edge_list, _paths):
     link_loads = {}
     for u, v in edge_list:
         link_loads[(u, v)]=0
-    for paths in k_shortest_paths.values():
-        k = len(paths)
+    for paths in _paths.values():
+        k = float(len(paths))
         for path in paths:
             for i in range(len(path) - 1):
                 u, v = path[i], path[i + 1]
@@ -78,9 +78,24 @@ def distribute_flow_on_paths(edge_list, k_shortest_paths):
 
     return link_loads
 
+def ALLPATH_H(graph, v1, v2, H):
+    all_paths = []
+    # Depth-first search to find all paths from v1 to v2
+    def dfs_paths(node, path):
+        if node == v2:
+            all_paths.append(path)
+        elif len(path) < H+1:
+            for neighbor in graph.neighbors(node):
+                if neighbor not in path:
+                    dfs_paths(neighbor, path + [neighbor])
+    dfs_paths(v1, [v1])
+    if not all_paths:
+        raise ValueError("H = {} too small, no such path exits from {} to {}".format(H, v1, v2))
+    return all_paths
+
 # small funtions above
 
-# do calculations for one particular GDBG graph (discarded):
+# do calculations for one particular GDBG graph (!discarded!):
 def calculate_single_network(num_vertices, degree, k):
     graph_edges = calculate_GDBG_edges(num_vertices, degree)
     graph = nx.DiGraph()
@@ -90,7 +105,7 @@ def calculate_single_network(num_vertices, degree, k):
     return k_shortest_average_lengths, arc_loads
 
 # Calculations for one particular GDBG graph, pickle the graph and the calculated k-shortest paths:
-def pickle_single_network(num_vertices, degree, k, path=None):
+def pickle_single_network_k_shortest_path(num_vertices, degree, k, path=None):
     graph_edges = calculate_GDBG_edges(num_vertices, degree)
     graph = nx.DiGraph()
     graph.add_edges_from(graph_edges)
@@ -101,4 +116,22 @@ def pickle_single_network(num_vertices, degree, k, path=None):
     else:
         pickle.dump(k_shortest_paths, open('./pickled_data/{}_shortest_paths_GDBG_({},{}).pickle'.format(k,num_vertices, degree), 'wb'))
         pickle.dump(graph, open('./pickled_data/GDBG_({},{}).pickle'.format(num_vertices, degree), 'wb'))
+    return
+
+# Calculations for one particular GDBG graph, pickle the graph and the calculated ALLPATH_H paths:
+def pickle_single_network_ALLPATH_H(num_vertices, degree, H, path=None):
+    graph_edges = calculate_GDBG_edges(num_vertices, degree)
+    graph = nx.DiGraph()
+    graph.add_edges_from(graph_edges)
+
+    ALLPATH_H_paths_dict={}
+    vertex_pairs = [(v1, v2) for v1 in graph.nodes() for v2 in graph.nodes() if v1 != v2]
+    for i, (v1, v2) in enumerate(vertex_pairs):
+        ALLPATH_H_paths_dict[(v1, v2)] = ALLPATH_H(graph, v1, v2, H)
+
+    if path:
+        KeyError("not yet implemented")
+    else:
+        pickle.dump(ALLPATH_H_paths_dict, open('./pickled_data/ALLPATH_{}_paths_GDBG_({},{}).pickle'.format(H,num_vertices, degree), 'wb'))
+        # pickle.dump(graph, open('./pickled_data/GDBG_({},{}).pickle'.format(num_vertices, degree), 'wb'))
     return
