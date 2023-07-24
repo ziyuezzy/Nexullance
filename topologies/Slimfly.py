@@ -1,4 +1,4 @@
-from . import Undirected_graph
+from . import HPC_topo
 import networkx as nx
 
 #========================some functions to calculate the MMS graph=======================================
@@ -50,7 +50,7 @@ def create_routes(q, Fq, X1, X2):
 #========================================== end ============================================
 
 # define the slimfly class
-class Slimflytopo(Undirected_graph.Undirected_graph_topo):
+class Slimflytopo(HPC_topo.HPC_topo):
     def __init__(self, num_vertices):
         super(Slimflytopo, self).__init__()
         self.generate_Equality_topo(num_vertices)

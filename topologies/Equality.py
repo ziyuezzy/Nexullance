@@ -1,5 +1,5 @@
 import networkx as nx
-from . import Undirected_graph
+from . import HPC_topo
 
 
 # Notations for Equality network:
@@ -7,7 +7,7 @@ from . import Undirected_graph
 # ahops: a list of odd numbers, each number contribute to one link connected to each router
 # bhops: a list of even numbers, each number contribute to two link connected to each router
 # Therefore, this should hold: k = len(ahops)+2*len(bhops)
-class Equalitytopo(Undirected_graph.Undirected_graph_topo):
+class Equalitytopo(HPC_topo.HPC_topo):
     def __init__(self, n, k, ahops, bhops):
         super(Equalitytopo, self).__init__()
         self.generate_Equality_topo(n, k, ahops, bhops)
