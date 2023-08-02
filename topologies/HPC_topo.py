@@ -3,8 +3,10 @@ import sys
 from itertools import islice
 from concurrent.futures import ThreadPoolExecutor
 from joblib import Parallel, delayed
-MAX_KERNELS = 12 # define maximum threads to run
+MAX_KERNELS = 10 # define maximum threads to run
 import numpy as np
+
+#TODO: check "bfs", "all_pairs_shortest_path" and "Floyd–Warshall algorithm", for speeding up the methods
 
 class HPC_topo:
     def __init__(self):
@@ -91,8 +93,43 @@ class HPC_topo:
             paths_dict[(v1, v2)] = all_paths
 
         return paths_dict
+    
+    # def calculate_all_paths_within_length_parallel_2(self, max_length): 
+    #     #another parallel algorithm by chatgpt, using iterative DFS to avoid memory overhead
+    #     assert max_length >= self.calculate_diameter()
 
-    def calculate_all_shortest_paths(self):
+    #     def iterative_dfs_paths(start, end, max_length):
+    #         stack = [(start, [start])]
+    #         all_paths = []
+    #         while stack:
+    #             node, path = stack.pop()
+    #             if node == end:
+    #                 all_paths.append(path)
+    #             elif len(path) < max_length + 1:
+    #                 for neighbor in self.nx_graph.neighbors(node):
+    #                     if neighbor not in path:
+    #                         stack.append((neighbor, path + [neighbor]))
+    #         return all_paths
+
+    #     vertex_pairs = [(v1, v2) for v1 in self.nx_graph.nodes() for v2 in self.nx_graph.nodes() if v1 != v2]
+
+    #     # Calculate the paths in parallel
+    #     results = Parallel(n_jobs=MAX_KERNELS)(
+    #         delayed(iterative_dfs_paths)(v1, v2, max_length) for v1, v2 in vertex_pairs
+    #     )
+
+    #     # Process the results as needed
+    #     paths_dict = {}
+    #     for (v1, v2), all_paths in zip(vertex_pairs, results):
+    #         if not all_paths:
+    #             raise ValueError(f"Error, no path found between vertex {v1} and vertex {v2}")
+    #         paths_dict[(v1, v2)] = all_paths
+    #         # print(f"number of paths found for s-d ({v1}, {v2}) is {len(all_paths)}")
+
+    #     return paths_dict
+
+
+    def calculate_all_shortest_paths(self): 
         vertices = self.nx_graph.nodes()
         vertex_pairs = [(v1, v2) for v1 in vertices for v2 in vertices if v1 != v2]
         paths_dict={}
@@ -158,3 +195,17 @@ class HPC_topo:
                     u, v = path[i], path[i + 1]
                     link_loads[(u, v)] += normal_dist[count] / k
         return link_loads
+    
+    def s_d_bw_dist(self, paths_dict, link_load_dict):
+        bw_dict={}
+        for s_d, paths in paths_dict.items():
+            s_d_bw=0
+            for path in paths:
+                bw_list=[]
+                for i in range(len(path)-1):
+                    u, v = path[i], path[i + 1]
+                    bw_list.append(1/link_load_dict[(u, v)])
+                min_bw=min(bw_list)
+                s_d_bw+=min_bw
+            bw_dict[s_d]=s_d_bw
+        return bw_dict

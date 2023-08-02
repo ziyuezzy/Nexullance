@@ -4,3 +4,4 @@ nohup.out
 *.png
 archive/
 pickled_data
+*.txt

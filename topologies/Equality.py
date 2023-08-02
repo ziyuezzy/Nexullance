@@ -8,9 +8,31 @@ from . import HPC_topo
 # bhops: a list of even numbers, each number contribute to two link connected to each router
 # Therefore, this should hold: k = len(ahops)+2*len(bhops)
 class Equalitytopo(HPC_topo.HPC_topo):
-    def __init__(self, n, k, ahops, bhops):
-        super(Equalitytopo, self).__init__()
-        self.generate_Equality_topo(n, k, ahops, bhops)
+    # def __init__(self, n, k, ahops, bhops):
+    #     super(Equalitytopo, self).__init__()
+    #     self.generate_Equality_topo(n, k, ahops, bhops)
+
+    # def __init__(self, edgelist):
+    #     super(Equalitytopo, self).__init__()
+    #     # create the embedded graph
+    #     graph = nx.Graph()
+    #     graph.add_edges_from(edgelist)
+    #     self.nx_graph = graph
+
+    def __init__(self, *args, **kwargs):
+        if len(args) == 4 and isinstance(args[0], int) and isinstance(args[1], int):
+            assert(isinstance(args[2], list) and isinstance(args[3], list))
+            super(Equalitytopo, self).__init__()
+            self.generate_Equality_topo(args[0], args[1], args[2], args[3])
+        elif len(args) == 1 and isinstance(args[0], list):
+            super(Equalitytopo, self).__init__()
+            # create the embedded graph
+            graph = nx.Graph()
+            graph.add_edges_from(args[0])
+            self.nx_graph = graph
+        else:
+            raise ValueError('Input arguements not accepted.')
+
 
     def generate_Equality_topo(self, n, k, ahops, bhops):
         assert(k==len(ahops)+2*len(bhops))

@@ -51,11 +51,33 @@ def create_routes(q, Fq, X1, X2):
 
 # define the slimfly class
 class Slimflytopo(HPC_topo.HPC_topo):
-    def __init__(self, num_vertices):
-        super(Slimflytopo, self).__init__()
-        self.generate_Equality_topo(num_vertices)
+    # def __init__(self, num_vertices):
+    #     super(Slimflytopo, self).__init__()
+    #     self.generate_slimfly_topo(num_vertices)
 
-    def generate_Equality_topo(self, num_vertices):
+    # def __init__(self, edgelist):
+    #     super(Slimflytopo, self).__init__()
+    #     # create the embedded graph
+    #     graph = nx.Graph()
+    #     graph.add_edges_from(edgelist)
+    #     self.nx_graph = graph
+
+    def __init__(self, *args, **kwargs):
+        if len(args) == 1 and isinstance(args[0], int):
+            super(Slimflytopo, self).__init__()
+            self.generate_slimfly_topo(args[0])
+
+        elif isinstance(args[0], list):
+            super(Slimflytopo, self).__init__()
+            # create the embedded graph
+            graph = nx.Graph()
+            graph.add_edges_from(args[0])
+            self.nx_graph = graph
+        else:
+            raise ValueError('Input arguements not accepted.')
+
+            
+    def generate_slimfly_topo(self, num_vertices):
         q=pow(num_vertices/2, 0.5)
         if not q.is_integer():
             raise KeyError("specified number of vertices is not supported by 2-Diameter Slimfly, num_vertices need to be 2*q^2")
