@@ -21,12 +21,12 @@ class fakeGDBGtopo(HPC_topo.HPC_topo):
             super(fakeGDBGtopo, self).__init__()
             num_vertices=args[0]
             degree=args[1]
-            self.nx_graph = nx.Graph()        
+            # self.nx_graph = nx.Graph()        
             assert(num_vertices > degree)
             # Create a list of edges
             edges = []    
             for v in range(num_vertices):
-                for e in range(degree):
+                for e in range(degree//2):
                     if v != (degree*v+e)%num_vertices: #exclude self-loop arcs
                         edges.extend([(v, (degree*v+e)%num_vertices)])
             self.nx_graph.add_edges_from(edges)

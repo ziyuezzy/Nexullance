@@ -1,6 +1,6 @@
 import networkx as nx
 from . import HPC_topo
-
+from statistics import mean
 
 # Notations for Equality network:
 # n = number of routers; k = inter-router radix; p = number of endpoints per router
@@ -55,4 +55,5 @@ class Equalitytopo(HPC_topo.HPC_topo):
         graph = nx.Graph()
         graph.add_edges_from(edges)
         self.nx_graph = graph
+        assert(mean([i[1] for i in list(self.nx_graph.degree)])==k)
         return

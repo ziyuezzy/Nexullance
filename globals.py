@@ -3,12 +3,11 @@ from statistics import mean
 #Configurations:
 #slimfly configurations:
 # sf_configs= [722]
-sf_configs= [722, 1058]
+sf_configs= [(722, 29), (1058, 35)]
 #jellyfish configurations:
-jf_configs =  [(722, 28), (900,32), (1058, 34)]
+jf_configs =  [(722, 29), (900,32), (1058, 35)]
 #GDBG configurations, the degree is doubled because it is a directed graph: 
-gdbg_configs = [(722, 28*2), (900,32*2), (1058, 34*2)]
-fake_gdbg_configs = [(722, 28), (900,32), (1058, 34)]
+gdbg_configs = [(722, 29), (900,32), (1058, 35)]
 #Equality configurations:
 eq_configs= [ # Note that E443 config is fault on the equality paper, so here it is commented out
 # (800, 31, [-1, 1, 27, 39, 45, 105, 215, 327, 365, 401, 455, 491, 523, 545, 547, 605, 653, 701, 715, 771, 801, 813, 865, 875, 955], [70, 180, 320, 430], "E443"),
@@ -31,6 +30,26 @@ def process_path_dict(path_dict):
     # Calculate the average path length of all s-d pairs, 
     # The output is a dictionary of average path lengths
     return average_path_lengths, num_paths
+
+def is_disjoint(path1, path2):
+    # Function to check if two paths are disjoint
+    return not set(path1) & set(path2)
+
+def count_disjoint_paths(paths_dict):
+    disjoint_paths_count = []
+    for (s, d), paths in paths_dict.items():
+        count = 0
+        for i in range(len(paths)):
+            is_disjoint_path = True
+            for j in range(i + 1, len(paths)):
+                if not is_disjoint(paths[i], paths[j]):
+                    is_disjoint_path = False
+                    break
+            if is_disjoint_path:
+                count += 1
+        disjoint_paths_count.append(count)
+    return disjoint_paths_count
+
 
 
 def calculate_data_shortest_paths(topology_instance, config):
