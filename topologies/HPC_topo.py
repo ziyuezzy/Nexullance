@@ -175,7 +175,7 @@ class HPC_topo:
                     link_loads[(u, v)] += 1 / k
         return link_loads
     
-    def distribute_uniform_flow_on_paths_2(self, path_dict, p):
+    def distribute_uniform_flow_on_paths_with_EP(self, path_dict, p):
         #p is the subscription of routers, meaning the number of EPs attached to one router
         link_loads = {}
         local_link_load = {}
