@@ -132,7 +132,6 @@ class HPC_topo:
     def calculate_all_shortest_paths(self): 
         vertices = self.nx_graph.nodes()
         vertex_pairs = [(v1, v2) for v1 in vertices for v2 in vertices if v1 != v2]
-        paths_dict={}
         def calculate_shortest_paths(v1, v2):
             return list(nx.all_shortest_paths(self.nx_graph, v1, v2))
         
@@ -163,7 +162,7 @@ class HPC_topo:
             self.diameter=diameter
             return diameter
     
-    def distribute_uniform_flow_on_paths(self, path_dict):
+    def distribute_uniform_flow_on_paths(self, path_dict): # equivalent to '1 EP per router'
         link_loads = {}
         for u, v in list(self.nx_graph.edges()):
             link_loads[(u, v)]=0
@@ -175,6 +174,38 @@ class HPC_topo:
                     u, v = path[i], path[i + 1]
                     link_loads[(u, v)] += 1 / k
         return link_loads
+    
+    def distribute_uniform_flow_on_paths_2(self, path_dict, p):
+        #p is the subscription of routers, meaning the number of EPs attached to one router
+        link_loads = {}
+        local_link_load = {}
+        # initialization
+        for u, v in list(self.nx_graph.edges()):
+            link_loads[(u, v)]=0
+            link_loads[(v, u)]=0
+        for u in list(self.nx_graph.nodes()):
+            for EP in range(p):
+                local_link_load[(u, -EP-1)]=0 # from router to EP #Note that the '-EP-1' is just for distinguish the EP ids from router ids
+                local_link_load[(-EP-1, u)]=0 # from EP to router
+        # start calculation
+        for u in list(self.nx_graph.nodes()):
+            for src_EP in range(p):
+                for v in list(self.nx_graph.nodes()):
+                    for dest_EP in range(p):
+                        if u==v and src_EP==dest_EP:
+                            continue
+                        local_link_load[(u, -src_EP-1)]+=1
+                        local_link_load[(-dest_EP-1, v)]+=1
+                        if u!=v:
+                            paths=path_dict[(u, v)]
+                            k = float(len(paths))
+                            for path in paths:
+                                for i in range(len(path) - 1):
+                                    vertex1, vertex2 = path[i], path[i + 1]
+                                    link_loads[(vertex1, vertex2)] += 1 / k
+        return link_loads, local_link_load
+                
+
 
     def distribute_uniform_random_flow_on_paths(self, path_dict, std ,seed=0):
         #std is the standard deviation of the uniform random distribution
