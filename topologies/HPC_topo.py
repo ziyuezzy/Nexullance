@@ -175,6 +175,23 @@ class HPC_topo:
                     link_loads[(u, v)] += 1 / k
         return link_loads
     
+    def distribute_uniform_flow_on_weighted_paths(self, path_dict):
+        link_loads = {}
+        for u, v in list(self.nx_graph.edges()):
+            link_loads[(u, v)]=0
+            link_loads[(v, u)]=0
+        for j, paths in enumerate(path_dict.values()):
+            check_sum=0
+            for path, weight in paths:
+                if j == len(paths)-1:
+                    w=1-check_sum
+                    assert(abs(w-weight)<0.01)
+                else:
+                    for i in range(len(path) - 1):
+                        u, v = path[i], path[i + 1]
+                        link_loads[(u, v)] += weight
+        return link_loads
+    
     def distribute_uniform_flow_on_paths_with_EP(self, path_dict, p):
         #p is the subscription of routers, meaning the number of EPs attached to one router
         link_loads = {}
