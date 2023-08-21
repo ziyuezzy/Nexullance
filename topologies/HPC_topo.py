@@ -203,7 +203,16 @@ class HPC_topo:
                                 for i in range(len(path) - 1):
                                     vertex1, vertex2 = path[i], path[i + 1]
                                     link_loads[(vertex1, vertex2)] += 1 / k
-        return link_loads, local_link_load
+
+        #calculate total flow and normalize the link load numbers
+        total_flows = self.nx_graph.number_of_nodes()*p * (self.nx_graph.number_of_nodes()*p-1)
+        link_occupancy_rate=[v for v in link_loads.values()]
+        local_link_occupancy_rate=[v for v in local_link_load.values()]
+
+        link_loads = [ v / total_flows for v in link_loads.values()]
+        local_link_load = [ v / total_flows for v in local_link_load.values()]
+
+        return link_occupancy_rate, local_link_occupancy_rate, link_loads, local_link_load
                 
 
 

@@ -130,12 +130,12 @@ import pickle
 # # except:
 # #     print("An exception occurred for gdbg")
 
-topo_name='slimfly'
-for config in sf_configs:
-    edgelist=pickle.load(open(f'pickled_data/graphs_and_paths/{config}_{topo_name}_edgelist.pickle', 'rb'))
-    _network = RRG.RRGtopo(edgelist)
-    _result, _graph, paths_dict =calculate_data_paths_within_length(_network, config, 2)
-    print(f"calculation done for {topo_name} {config}")
-    pickle.dump(_result, open(f'./pickled_data/statistics/ALLPATH_2_{config}_{topo_name}_uniform_flow.pickle', 'wb'))
-    # pickle.dump(_graph, open(f'./pickled_data/graphs_and_paths/{config}_{topo_name}_edgelist.pickle', 'wb'))
-    pickle.dump(paths_dict, open(f'./pickled_data/graphs_and_paths/ALLPATH_2_{config}_{topo_name}_paths.pickle', 'wb'))
+# topo_name='slimfly'
+# for config in sf_configs:
+#     edgelist=pickle.load(open(f'pickled_data/graphs_and_paths/{config}_{topo_name}_edgelist.pickle', 'rb'))
+#     _network = RRG.RRGtopo(edgelist)
+#     _result, _graph, paths_dict =calculate_data_paths_within_length(_network, config, 2)
+#     print(f"calculation done for {topo_name} {config}")
+#     pickle.dump(_result, open(f'./pickled_data/statistics/ALLPATH_2_{config}_{topo_name}_uniform_flow.pickle', 'wb'))
+#     # pickle.dump(_graph, open(f'./pickled_data/graphs_and_paths/{config}_{topo_name}_edgelist.pickle', 'wb'))
+#     pickle.dump(paths_dict, open(f'./pickled_data/graphs_and_paths/ALLPATH_2_{config}_{topo_name}_paths.pickle', 'wb'))
