@@ -202,3 +202,11 @@ def calculate_data_paths_within_length(topology_instance, config, max_path_lengt
         }
     print(f"calculation done for {config} with shortest paths routing")
     return _result, list(topology_instance.nx_graph.edges()), paths_dict
+
+def convert_path_dict_to_weighted_path_dict(path_dict):
+    weighted_path_dict={}
+    for (u,v), paths in path_dict.items():
+        weighted_path_dict[(u,v)]=[]
+        for path in paths:
+            weighted_path_dict[(u,v)].append( (path, 1/len(paths)) )
+    return weighted_path_dict
