@@ -3,7 +3,7 @@ import sys
 from itertools import islice
 from concurrent.futures import ThreadPoolExecutor
 from joblib import Parallel, delayed
-MAX_KERNELS = 10 # define maximum threads to run
+MAX_KERNELS = 2 # define maximum threads to run
 import numpy as np
 
 #TODO: check "bfs", "all_pairs_shortest_path" and "Floyd–Warshall algorithm", for speeding up the methods

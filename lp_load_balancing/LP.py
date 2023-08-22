@@ -4,7 +4,7 @@ import pandas as pd
 import numpy as np
 
 
-def LP_load_balancing(path_dict, edge_list, topo, config):
+def LP_load_balancing(path_dict, edge_list):
 
     #input a non-weighted path dict, output a weighted path dict
     dict = {'source':[ ],
@@ -78,7 +78,8 @@ def LP_load_balancing(path_dict, edge_list, topo, config):
                 all_weighted_paths[(source, dest)]=[]
             
             all_weighted_paths[(source, dest)].append( (df.iloc[i]['path'], variable.value) )
-        pickle.dump(all_weighted_paths, open(f'../pickled_data/graphs_and_paths/LP_weighted_{config}_{topo}_paths.pickle', 'wb'))
     else:
         print(problem.status)
 
+
+    return all_weighted_paths
