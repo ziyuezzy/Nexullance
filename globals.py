@@ -33,6 +33,25 @@ def process_path_dict(path_dict):
     # The output is a dictionary of average path lengths
     return average_path_lengths, num_paths
 
+def process_weighted_path_dict(path_dict):
+    # input is a weighted path dictionary
+    average_path_lengths=[]
+    num_paths=[]
+
+    for _, paths in path_dict.items():
+        temp_num_paths=0
+        average_length=0
+        for path, weight in paths:
+            average_length+=(len(path)-1)*weight
+            if weight > 0.001:
+                temp_num_paths+=1
+        average_length
+        average_path_lengths.append(average_length)
+        num_paths.append(temp_num_paths)
+    # Calculate the average path length of all s-d pairs, 
+    # The output is a dictionary of average path lengths
+    return average_path_lengths, num_paths
+
 def is_disjoint(path1, path2):
     # Function to check if two paths are edge-disjoint
     edges1 = [(path1[i], path1[i + 1]) for i in range(len(path1) - 1)]

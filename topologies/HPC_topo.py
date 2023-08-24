@@ -180,16 +180,20 @@ class HPC_topo:
         for u, v in list(self.nx_graph.edges()):
             link_loads[(u, v)]=0
             link_loads[(v, u)]=0
-        for j, paths in enumerate(path_dict.values()):
+        for paths in path_dict.values():
             check_sum=0
-            for path, weight in paths:
+            for j, (path, weight) in enumerate(paths):
                 if j == len(paths)-1:
                     w=1-check_sum
                     assert(abs(w-weight)<0.01)
+                    for i in range(len(path) - 1):
+                        u, v = path[i], path[i + 1]
+                        link_loads[(u, v)] += w
                 else:
                     for i in range(len(path) - 1):
                         u, v = path[i], path[i + 1]
                         link_loads[(u, v)] += weight
+                    check_sum += weight
         return link_loads
     
     def distribute_uniform_flow_on_paths_with_EP(self, path_dict, p):
