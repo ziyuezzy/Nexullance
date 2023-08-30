@@ -6,7 +6,7 @@ import topologies.GDBG as GDBG
 import topologies.fake_GDBG as fake_GDBG
 import topologies.DDF as DDF
 import pickle
-import lp_load_balancing.LP as LP
+import lp_load_balancing.LP_cvspy as LP_cvspy
 
 topo_name='jellyfish'
 for config in jf_configs:

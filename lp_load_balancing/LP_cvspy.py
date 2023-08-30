@@ -69,7 +69,7 @@ def Generate_load_balancing_problem(path_dict, edge_list, traffic_matrix=None, _
 
 
 
-def Solve_load_balancing(path_dict, edge_list, traffic_matrix=None, _integer=False, _solver=None):
+def Solve_load_balancing(path_dict, edge_list, traffic_matrix=None, _integer=False, _solver=None, _verbose= True):
 
     num_routers=(1+pow(1+4*len(path_dict), 0.5))/2
     assert(num_routers.is_integer() and 'length of path_dict should be N*(N-1), N is the number of routers')
@@ -129,9 +129,9 @@ def Solve_load_balancing(path_dict, edge_list, traffic_matrix=None, _integer=Fal
     problem = cp.Problem(objective, constraints)
 
     if _solver:
-        problem.solve(solver=_solver, verbose=True)
+        problem.solve(solver=_solver, verbose=_verbose)
     else:
-        problem.solve(verbose=True)
+        problem.solve(verbose=_verbose)
 
     all_weighted_paths={}
 

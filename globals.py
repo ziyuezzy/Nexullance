@@ -1,5 +1,5 @@
 from statistics import mean
-import lp_load_balancing.LP as LP
+import lp_load_balancing.LP_cvspy as LP_cvspy
 
 #Configurations:
 #slimfly configurations:
@@ -132,7 +132,7 @@ def calculate_data_shortest_paths_with_LP(topology_instance, config):
     _load_max=max(_load_dict)
     _load_mean=mean(_load_dict)
 
-    LP_weighted_path_dict=LP.LP_load_balancing(paths_dict, edge_list)
+    LP_weighted_path_dict=LP_cvspy.LP_load_balancing(paths_dict, edge_list)
     LP_weighted_link_load = topology_instance.distribute_uniform_flow_on_weighted_paths(LP_weighted_path_dict)
     LP_load_dict=list(LP_weighted_link_load.values())
     LP_load_min=min(LP_load_dict)
@@ -190,7 +190,7 @@ def calculate_DDF_routing(topology_instance, config):
         # "graph_edge_list": list(topology_instance.nx_graph.edges()),
         # "paths_dict": paths_dict
         }
-    print(f"calculation done for {config} with shortest paths routing")
+    print(f"calculation done for {config} with unipath routing")
     return _result, list(topology_instance.nx_graph.edges()), paths_dict
 
 
