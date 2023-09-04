@@ -1,5 +1,6 @@
 from statistics import mean
 import lp_load_balancing.LP_cvspy as LP_cvspy
+import numpy as np
 
 #Configurations:
 #slimfly configurations:
@@ -267,10 +268,56 @@ def calculate_data_paths_within_length(topology_instance, config, max_path_lengt
     print(f"calculation done for {config} with shortest paths routing")
     return _result, list(topology_instance.nx_graph.edges()), paths_dict
 
-def convert_path_dict_to_weighted_path_dict(path_dict):
-    weighted_path_dict={}
-    for (u,v), paths in path_dict.items():
-        weighted_path_dict[(u,v)]=[]
-        for path in paths:
-            weighted_path_dict[(u,v)].append( (path, 1/len(paths)) )
-    return weighted_path_dict
+# def convert_path_dict_to_weighted_path_dict(path_dict):
+#     weighted_path_dict={}
+#     for (u,v), paths in path_dict.items():
+#         weighted_path_dict[(u,v)]=[]
+#         for path in paths:
+#             weighted_path_dict[(u,v)].append( (path, 1/len(paths)) )
+#     return weighted_path_dict
+
+
+def clean_up_weighted_paths(weighted_path_dict):
+    clean_weighted_path_dict={}
+    for (u,v), paths in weighted_path_dict.items():
+        weighted_paths=[]
+        check_sum=0
+        for j, (path, weight) in enumerate(paths):
+            weight=round(weight, 3)
+            if j == len(paths)-1:
+                w=round(1-check_sum, 3)
+                assert(abs(w-weight)<0.01)
+                if weight > 0.001:
+                    weighted_paths.append((path, w))
+                else:
+                    weighted_paths[-1]=(weighted_paths[-1][0],weighted_paths[-1][1]+w )
+            else:
+                if weight > 0.001:
+                    check_sum += weight
+                    weighted_paths.append((path, weight))
+        clean_weighted_path_dict[(u,v)]=weighted_paths
+    return clean_weighted_path_dict
+
+
+
+
+def generate_shift_traffic_pattern(num_routers, EPs_per_router):
+    total_num_EP=EPs_per_router*num_routers
+    traffic_matrix=np.zeros((total_num_EP, total_num_EP))
+    for i in range(total_num_EP):
+        traffic_matrix[i][(i+total_num_EP//2)%total_num_EP]=1
+
+    return traffic_matrix
+
+def convert_p2p_traffic_matrix_to_R2R(p2p_traffic_matrix, num_routers, EPs_per_router):
+    assert(len(p2p_traffic_matrix)==len(p2p_traffic_matrix[0])==num_routers*EPs_per_router)
+    R2R_traffic_matrix=np.zeros((num_routers, num_routers))
+    for s in range(num_routers):
+        for d in range(num_routers):
+            sum_R2R_flow=0
+            for sp in range(EPs_per_router):
+                for dp in range(EPs_per_router):
+                    sum_R2R_flow+=p2p_traffic_matrix[sp+s*EPs_per_router][dp+d*EPs_per_router]
+            R2R_traffic_matrix[s][d]=sum_R2R_flow
+
+    return R2R_traffic_matrix
