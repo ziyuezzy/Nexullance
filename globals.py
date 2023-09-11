@@ -268,13 +268,22 @@ def calculate_data_paths_within_length(topology_instance, config, max_path_lengt
     print(f"calculation done for {config} with shortest paths routing")
     return _result, list(topology_instance.nx_graph.edges()), paths_dict
 
-# def convert_path_dict_to_weighted_path_dict(path_dict):
-#     weighted_path_dict={}
-#     for (u,v), paths in path_dict.items():
-#         weighted_path_dict[(u,v)]=[]
-#         for path in paths:
-#             weighted_path_dict[(u,v)].append( (path, 1/len(paths)) )
-#     return weighted_path_dict
+def convert_path_dict_to_weighted_path_dict(path_dict):
+    weighted_path_dict={}
+    for (u,v), paths in path_dict.items():
+        weighted_path_dict[(u,v)]=[]
+        for path in paths:
+            weighted_path_dict[(u,v)].append( (path, 1/len(paths)) )
+    return weighted_path_dict
+
+
+def convert_path_dict_to_weighted_path_dict_with_cost(path_dict):
+    weighted_path_dict={}
+    for (u,v), paths in path_dict.items():
+        weighted_path_dict[(u,v)]=[]
+        for path in paths:
+            weighted_path_dict[(u,v)].append( [path, 1/len(paths), -1] )
+    return weighted_path_dict
 
 
 def clean_up_weighted_paths(weighted_path_dict):
@@ -314,6 +323,8 @@ def convert_p2p_traffic_matrix_to_R2R(p2p_traffic_matrix, num_routers, EPs_per_r
     R2R_traffic_matrix=np.zeros((num_routers, num_routers))
     for s in range(num_routers):
         for d in range(num_routers):
+            if s==d:
+                continue
             sum_R2R_flow=0
             for sp in range(EPs_per_router):
                 for dp in range(EPs_per_router):
