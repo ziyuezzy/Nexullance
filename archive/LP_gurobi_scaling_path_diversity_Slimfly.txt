@@ -1,0 +1,85 @@
+======== begin simulation for slimfly (32, 6) with path_length_restriction=3========
+calculation done for (32, 6) with shortest paths routing
+before LP optimization, shortest-path routing leads to link load distribution (min, ave, max): [13.380952380952367, 13.857142857142847, 16.23809523809523]
+flow-level simulation done for slimfly (32, 6) with shortest path routing, 
+     execution time is 4.481911897659302 s,
+      current and peak memory usages are: (5043224, 7135512) B
+Set parameter WLSAccessID
+Set parameter WLSSecret
+Set parameter LicenseID to value 2411299
+Academic license - for non-commercial use only - registered to ziyue.zhang@ugent.be
+number of variables = 6144, number of constraints = 1184
+Optimal solution found
+Max link load is: 10.0
+after LP optimization, link load distribution is (min, ave, max): 1.0 9.333333333333334 10.000000000000007
+load balance optimization done, 
+     execution time is 0.6058645248413086 s,
+      current and peak memory usages are: (5823133, 8720014) B
+======== begin simulation for slimfly (32, 6) with path_length_restriction=4========
+calculation done for (32, 6) with shortest paths routing
+before LP optimization, shortest-path routing leads to link load distribution (min, ave, max): [18.702233250620438, 19.387648194099917, 19.52473118279587]
+flow-level simulation done for slimfly (32, 6) with shortest path routing, 
+     execution time is 4.709289312362671 s,
+      current and peak memory usages are: (8121146, 8175860) B
+Set parameter WLSAccessID
+Set parameter WLSSecret
+Set parameter LicenseID to value 2411299
+Academic license - for non-commercial use only - registered to ziyue.zhang@ugent.be
+number of variables = 29824, number of constraints = 1184
+Optimal solution found
+Max link load is: 9.999999999999998
+after LP optimization, link load distribution is (min, ave, max): 5.4219765929779475 9.906629280450803 10.00000000000011
+load balance optimization done, 
+     execution time is 3.0739400386810303 s,
+      current and peak memory usages are: (10605465, 23921604) B
+======== begin simulation for slimfly (32, 6) with path_length_restriction=5========
+calculation done for (32, 6) with shortest paths routing
+before LP optimization, shortest-path routing leads to link load distribution (min, ave, max): [23.686079038769083, 24.482990814740784, 24.64237316993537]
+flow-level simulation done for slimfly (32, 6) with shortest path routing, 
+     execution time is 5.706747770309448 s,
+      current and peak memory usages are: (23125416, 23180130) B
+Set parameter WLSAccessID
+Set parameter WLSSecret
+Set parameter LicenseID to value 2411299
+Academic license - for non-commercial use only - registered to ziyue.zhang@ugent.be
+number of variables = 141824, number of constraints = 1184
+Optimal solution found
+Max link load is: 10.000000000000002
+after LP optimization, link load distribution is (min, ave, max): 6.149013030121215 9.959885552397102 10.000000000000957
+load balance optimization done, 
+     execution time is 13.846441745758057 s,
+      current and peak memory usages are: (35827146, 102271550) B
+======== begin simulation for slimfly (32, 6) with path_length_restriction=6========
+calculation done for (32, 6) with shortest paths routing
+before LP optimization, shortest-path routing leads to link load distribution (min, ave, max): [29.00737299866731, 29.577303367061155, 29.69128944074101]
+flow-level simulation done for slimfly (32, 6) with shortest path routing, 
+     execution time is 10.970783710479736 s,
+      current and peak memory usages are: (97610629, 97693063) B
+Set parameter WLSAccessID
+Set parameter WLSSecret
+Set parameter LicenseID to value 2411299
+Academic license - for non-commercial use only - registered to ziyue.zhang@ugent.be
+number of variables = 655744, number of constraints = 1184
+Optimal solution found
+Max link load is: 10.0
+after LP optimization, link load distribution is (min, ave, max): 1.0 9.333333333333334 10.0
+load balance optimization done, 
+     execution time is 68.20608496665955 s,
+      current and peak memory usages are: (156003006, 481607373) B
+======== begin simulation for slimfly (32, 6) with all shortest paths========
+calculation done for (32, 6) with shortest paths routing
+before LP optimization, shortest-path routing leads to link load distribution (min, ave, max): [6.0, 9.333333333333334, 10.0]
+flow-level simulation done for slimfly (32, 6) with shortest path routing, 
+     execution time is 5.075270414352417 s,
+      current and peak memory usages are: (4463829, 7135743) B
+Set parameter WLSAccessID
+Set parameter WLSSecret
+Set parameter LicenseID to value 2411299
+Academic license - for non-commercial use only - registered to ziyue.zhang@ugent.be
+number of variables = 1344, number of constraints = 352
+Optimal solution found
+Max link load is: 10.0
+after LP optimization, link load distribution is (min, ave, max): 1.0 9.333333333333334 10.0
+load balance optimization done, 
+     execution time is 0.10808467864990234 s,
+      current and peak memory usages are: (4760335, 7135743) B

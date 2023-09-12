@@ -1,0 +1,85 @@
+======== begin simulation for ddf (36, 5) with path_length_restriction=3========
+calculation done for (36, 5) with shortest paths routing
+before LP optimization, shortest-path routing leads to link load distribution (min, ave, max): [15.53333333333333, 19.119999999999997, 22.883333333333336]
+flow-level simulation done for ddf (36, 5) with shortest path routing, 
+     execution time is 0.9236876964569092 s,
+      current and peak memory usages are: (1245770, 1309483) B
+Set parameter WLSAccessID
+Set parameter WLSSecret
+Set parameter LicenseID to value 2411299
+Academic license - for non-commercial use only - registered to ziyue.zhang@ugent.be
+number of variables = 3744, number of constraints = 1134
+Optimal solution found
+Max link load is: 16.5609756097561
+after LP optimization, link load distribution is (min, ave, max): 16.56097560975592 16.5609756097561 16.56097560975627
+load balance optimization done, 
+     execution time is 0.7477023601531982 s,
+      current and peak memory usages are: (1820458, 3630337) B
+======== begin simulation for ddf (36, 5) with path_length_restriction=4========
+calculation done for (36, 5) with shortest paths routing
+before LP optimization, shortest-path routing leads to link load distribution (min, ave, max): [22.55499777999774, 25.118103563103535, 27.775585525585516]
+flow-level simulation done for ddf (36, 5) with shortest path routing, 
+     execution time is 1.0193793773651123 s,
+      current and peak memory usages are: (2525162, 2588595) B
+Set parameter WLSAccessID
+Set parameter WLSSecret
+Set parameter LicenseID to value 2411299
+Academic license - for non-commercial use only - registered to ziyue.zhang@ugent.be
+number of variables = 13464, number of constraints = 1440
+Optimal solution found
+Max link load is: 16.560975609756095
+after LP optimization, link load distribution is (min, ave, max): 16.56097560975599 16.5609756097561 16.56097560975647
+load balance optimization done, 
+     execution time is 1.349987268447876 s,
+      current and peak memory usages are: (4010321, 10379120) B
+======== begin simulation for ddf (36, 5) with path_length_restriction=5========
+calculation done for (36, 5) with shortest paths routing
+before LP optimization, shortest-path routing leads to link load distribution (min, ave, max): [28.440597825975154, 32.19098580010254, 37.54126653052542]
+flow-level simulation done for ddf (36, 5) with shortest path routing, 
+     execution time is 1.2942190170288086 s,
+      current and peak memory usages are: (7421578, 7485180) B
+Set parameter WLSAccessID
+Set parameter WLSSecret
+Set parameter LicenseID to value 2411299
+Academic license - for non-commercial use only - registered to ziyue.zhang@ugent.be
+number of variables = 49176, number of constraints = 1440
+Optimal solution found
+Max link load is: 16.5609756097561
+after LP optimization, link load distribution is (min, ave, max): 16.560975609755445 16.5609756097561 16.56097560975667
+load balance optimization done, 
+     execution time is 5.1848883628845215 s,
+      current and peak memory usages are: (11916309, 36059525) B
+======== begin simulation for ddf (36, 5) with path_length_restriction=6========
+calculation done for (36, 5) with shortest paths routing
+before LP optimization, shortest-path routing leads to link load distribution (min, ave, max): [34.9290034079921, 39.30098484812515, 46.16491637886062]
+flow-level simulation done for ddf (36, 5) with shortest path routing, 
+     execution time is 2.782503604888916 s,
+      current and peak memory usages are: (25844350, 25907979) B
+Set parameter WLSAccessID
+Set parameter WLSSecret
+Set parameter LicenseID to value 2411299
+Academic license - for non-commercial use only - registered to ziyue.zhang@ugent.be
+number of variables = 177192, number of constraints = 1440
+Optimal solution found
+Max link load is: 16.560975609756085
+after LP optimization, link load distribution is (min, ave, max): 16.560975609751697 16.560975609756053 16.560975609759886
+load balance optimization done, 
+     execution time is 17.928776025772095 s,
+      current and peak memory usages are: (41808143, 135098122) B
+======== begin simulation for ddf (36, 5) with all shortest paths========
+calculation done for (36, 5) with shortest paths routing
+before LP optimization, shortest-path routing leads to link load distribution (min, ave, max): [12.166666666666666, 16.4, 23.083333333333336]
+flow-level simulation done for ddf (36, 5) with shortest path routing, 
+     execution time is 1.2572808265686035 s,
+      current and peak memory usages are: (1051212, 1114658) B
+Set parameter WLSAccessID
+Set parameter WLSSecret
+Set parameter LicenseID to value 2411299
+Academic license - for non-commercial use only - registered to ziyue.zhang@ugent.be
+number of variables = 2124, number of constraints = 558
+Optimal solution found
+Max link load is: 17.57142857142857
+after LP optimization, link load distribution is (min, ave, max): 13.999999999999996 16.4 17.571428571428772
+load balance optimization done, 
+     execution time is 0.5113463401794434 s,
+      current and peak memory usages are: (1444608, 2213434) B

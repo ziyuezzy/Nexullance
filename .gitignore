@@ -1,8 +1,5 @@
 __pycache__/
-tests/
+test.ipynb
 nohup.out
 *.png
-archive/
 pickled_data
-*.txt
-*.ipynb
