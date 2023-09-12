@@ -20,6 +20,12 @@ class RRGtopo(HPC_topo.HPC_topo):
             num_vertices=args[0]
             self.nx_graph = nx.random_regular_graph(degree, num_vertices, seed=0)
 
+        elif len(args) == 3 and isinstance(args[0], int) and isinstance(args[1], int) and isinstance(args[2], int):
+            super(RRGtopo, self).__init__()
+            degree=args[1]
+            num_vertices=args[0]
+            self.nx_graph = nx.random_regular_graph(degree, num_vertices, seed=args[2])
+
         elif len(args) == 1 and isinstance(args[0], list):
             super(RRGtopo, self).__init__()
             # create the embedded graph

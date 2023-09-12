@@ -265,7 +265,7 @@ def calculate_data_paths_within_length(topology_instance, config, max_path_lengt
         # "graph_edge_list": list(topology_instance.nx_graph.edges()),
         # "paths_dict": paths_dict
         }
-    print(f"calculation done for {config} with shortest paths routing")
+    print(f"calculation done for {config} with shorter-than-{max_path_length} paths routing")
     return _result, list(topology_instance.nx_graph.edges()), paths_dict
 
 def convert_path_dict_to_weighted_path_dict(path_dict):
@@ -309,6 +309,13 @@ def clean_up_weighted_paths(weighted_path_dict):
 
 
 
+
+def generate_uniform_traffic_pattern(num_routers, EPs_per_router):
+    total_num_EP=EPs_per_router*num_routers
+    traffic_matrix=np.ones((total_num_EP, total_num_EP))
+    for i in range(total_num_EP):
+        traffic_matrix[i][i]=0
+    return traffic_matrix
 
 def generate_shift_traffic_pattern(num_routers, EPs_per_router):
     total_num_EP=EPs_per_router*num_routers
