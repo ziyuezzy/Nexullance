@@ -3,3 +3,4 @@ test.ipynb
 nohup.out
 *.png
 pickled_data
+*.txt

@@ -2,6 +2,7 @@ from . import HPC_topo
 import networkx as nx
 from statistics import mean
 import galois
+import random
 
 #========================some functions to calculate the MMS graph=======================================
 # This part of the code is copied from this github repo: https://github.com/AdamLatos/slimfly-gen/blob/master/
@@ -127,4 +128,14 @@ class Slimflytopo(HPC_topo.HPC_topo):
         graph.add_edges_from(edges)
         self.nx_graph = graph
         assert(mean([i[1] for i in list(self.nx_graph.degree)])==degree)
+        return
+
+
+        
+    def set_critical_link_failures(self, failure_ratio, seed=0):
+
+        return
+
+    def set_noncritical_link_failures(self, failure_ratio, seed=0):
+
         return

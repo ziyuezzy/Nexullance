@@ -1,6 +1,7 @@
 import networkx as nx
 from . import HPC_topo
 from statistics import mean
+import random
 
 # Dally DragonFly (DDF) network topology
 class DDFtopo(HPC_topo.HPC_topo):
@@ -50,7 +51,7 @@ class DDFtopo(HPC_topo.HPC_topo):
             for src in routers_in_group:
                 for dest in routers_in_group:
                     if src!=dest:
-                        G.add_edge(src, dest)
+                        G.add_edge(src, dest, intergroup=False)
 
         next_router=[0]*self.num_groups #note that this is the relative router id in a group
         groups_to_connect=[]
@@ -67,7 +68,7 @@ class DDFtopo(HPC_topo.HPC_topo):
                 next_router[dest_g]=(next_router[dest_g]+1)%self.routers_per_group
                 assert(dest_r<R)
                 assert(src_r<R)
-                G.add_edge(src_r, dest_r)
+                G.add_edge(src_r, dest_r, intergroup=True)
                 G.nodes[src_r]["adjacency"][dest_g]=dest_r
                 G.nodes[dest_r]["adjacency"][group]=src_r
 
@@ -116,3 +117,46 @@ class DDFtopo(HPC_topo.HPC_topo):
             paths_dict[(v1, v2)].append(path)
         
         return paths_dict
+    
+        
+    def set_intergroup_link_failures(self, failure_ratio, seed=0):
+        G=self.nx_graph
+        # Find edges with the desired attribute
+        num_edges=len(G.edges())
+        edges_to_delete = [(u, v) for u, v, attrs in G.edges(data=True) if attrs['intergroup'] == True]
+        # Shuffle the list of edges to delete
+        random.shuffle(edges_to_delete)
+        # Select a random subset of edges to delete
+        num_edges_to_delete = int(failure_ratio * num_edges)
+        if num_edges_to_delete>len(edges_to_delete):
+            raise ValueError("not enough intergroup links to delete!")
+        
+        edges_to_delete = edges_to_delete[:num_edges_to_delete]
+        # Delete the selected edges
+        G.remove_edges_from(edges_to_delete)
+        print(f"{num_edges_to_delete} edge(s) has been deleted from inter-group edge list")
+        if not nx.is_connected(G):
+            raise ValueError("Graph is not connected after the deletions!")
+        
+        return
+
+    def set_intragroup_link_failures(self, failure_ratio, seed=0):
+        G=self.nx_graph
+        # Find edges with the desired attribute
+        num_edges=len(G.edges())
+        edges_to_delete = [(u, v) for u, v, attrs in G.edges(data=True) if attrs['intergroup'] == False]
+        # Shuffle the list of edges to delete
+        random.shuffle(edges_to_delete)
+        # Select a random subset of edges to delete
+        num_edges_to_delete = int(failure_ratio * num_edges)
+        if num_edges_to_delete>len(edges_to_delete):
+            raise ValueError("not enough intergroup links to delete!")
+        
+        edges_to_delete = edges_to_delete[:num_edges_to_delete]
+        # Delete the selected edges
+        G.remove_edges_from(edges_to_delete)
+        print(f"{num_edges_to_delete} edge(s) has been deleted from inter-group edge list")
+        if not nx.is_connected(G):
+            raise ValueError("Graph is not connected after the deletions!")
+        
+        return

@@ -5,6 +5,7 @@ from concurrent.futures import ThreadPoolExecutor
 from joblib import Parallel, delayed
 MAX_KERNELS = 6 # define maximum threads to run
 import numpy as np
+import random
 
 #TODO: check "bfs", "all_pairs_shortest_path" and "Floyd–Warshall algorithm", for speeding up the methods
 
@@ -393,16 +394,32 @@ class HPC_topo:
                     link_loads[(u, v)] += normal_dist[count] / k
         return link_loads
     
-    def s_d_bw_dist(self, paths_dict, link_load_dict):
-        bw_dict={}
-        for s_d, paths in paths_dict.items():
-            s_d_bw=0
-            for path in paths:
-                bw_list=[]
-                for i in range(len(path)-1):
-                    u, v = path[i], path[i + 1]
-                    bw_list.append(1/link_load_dict[(u, v)])
-                min_bw=min(bw_list)
-                s_d_bw+=min_bw
-            bw_dict[s_d]=s_d_bw
-        return bw_dict
+    # def s_d_bw_dist(self, paths_dict, link_load_dict):
+    #     bw_dict={}
+    #     for s_d, paths in paths_dict.items():
+    #         s_d_bw=0
+    #         for path in paths:
+    #             bw_list=[]
+    #             for i in range(len(path)-1):
+    #                 u, v = path[i], path[i + 1]
+    #                 bw_list.append(1/link_load_dict[(u, v)])
+    #             min_bw=min(bw_list)
+    #             s_d_bw+=min_bw
+    #         bw_dict[s_d]=s_d_bw
+    #     return bw_dict
+
+
+    def set_random_link_failures(self, failure_ratio, seed=0):
+        G=self.nx_graph
+        # Get the list of edges in the graph
+        assert(0<failure_ratio<1)
+        num_edges_to_delete=int(failure_ratio * G.number_of_edges())
+        edges_to_delete = random.sample(G.edges(), num_edges_to_delete)
+        # Delete the selected edges
+        G.remove_edges_from(edges_to_delete)
+        if not nx.is_connected(G):
+            raise ValueError("Graph is not connected after the deletions!")
+        print(f"{num_edges_to_delete} edge(s) has been deleted from inter-group edge list")
+        
+        return
+    
