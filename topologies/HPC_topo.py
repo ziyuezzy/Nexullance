@@ -410,6 +410,7 @@ class HPC_topo:
 
 
     def set_random_link_failures(self, failure_ratio, seed=0):
+        random.seed(seed)
         G=self.nx_graph
         # Get the list of edges in the graph
         assert(0<failure_ratio<1)

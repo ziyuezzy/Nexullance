@@ -80,7 +80,7 @@ def Solve_load_balancing(path_dict, edge_list, traffic_matrix=[], _integer=False
         # model.setParam(GRB.Param.OptimalityTol, 1e-9)
         # model.setParam(GRB.Param.IntFeasTol, 1e-9)
         # model.setParam(GRB.Param.FeasibilityTol, 1e-9)
-        model.setParam(GRB.Param.IterationLimit, 2)
+        # model.setParam(GRB.Param.IterationLimit, 2)
         model.setParam(GRB.Param.Method, _solver)  
         # Optimize the model
         model.optimize()

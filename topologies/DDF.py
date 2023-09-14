@@ -120,6 +120,7 @@ class DDFtopo(HPC_topo.HPC_topo):
     
         
     def set_intergroup_link_failures(self, failure_ratio, seed=0):
+        random.seed(seed)
         G=self.nx_graph
         # Find edges with the desired attribute
         num_edges=len(G.edges())
@@ -141,6 +142,7 @@ class DDFtopo(HPC_topo.HPC_topo):
         return
 
     def set_intragroup_link_failures(self, failure_ratio, seed=0):
+        random.seed(seed)
         G=self.nx_graph
         # Find edges with the desired attribute
         num_edges=len(G.edges())

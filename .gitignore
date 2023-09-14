@@ -4,3 +4,4 @@ nohup.out
 *.png
 pickled_data
 *.txt
+lp_load_balancing/*.ipynb
