@@ -55,15 +55,15 @@ def create_routes(q, Fq, X1, X2):
         for y in Fq:
             for yp in Fq:
                 if (y - yp) in X1:
-                    routes[(0,int(x),int(y))].add((0,int(x),int(yp)))
-                    routes[(0,int(x),int(yp))].add((0,int(x),int(y)))
+                    routes[(0,int(x),int(y))].add((0,int(x),int(yp), False))
+                    routes[(0,int(x),int(yp))].add((0,int(x),int(y), False))
                 if (y - yp) in X2:
-                    routes[(1,int(x),int(y))].add((1,int(x),int(yp)))
-                    routes[(1,int(x),int(yp))].add((1,int(x),int(y)))
+                    routes[(1,int(x),int(y))].add((1,int(x),int(yp), False))
+                    routes[(1,int(x),int(yp))].add((1,int(x),int(y), False))
                 for xp in Fq:
                     if (xp * x + yp) == y:
-                        routes[(0,int(x),int(y))].add((1,int(xp),int(yp)))
-                        routes[(1,int(xp),int(yp))].add((0,int(x),int(y)))
+                        routes[(0,int(x),int(y))].add((1,int(xp),int(yp), True))
+                        routes[(1,int(xp),int(yp))].add((0,int(x),int(y), True))
     return routes
 #========================================== end ============================================
 
@@ -121,7 +121,7 @@ class Slimflytopo(HPC_topo.HPC_topo):
             i, x, y = N_to_Cartesian_product(u)
             for connection in connectivity[(i,x,y)]:
                 v = Cartesian_product_to_N(connection[0], connection[1], connection[2])
-                edges.extend([(u, v)])
+                edges.extend([(u, v, {'critical': connection[3]})])
 
         # create the embedded graph
         graph = nx.Graph()
@@ -133,9 +133,43 @@ class Slimflytopo(HPC_topo.HPC_topo):
 
         
     def set_critical_link_failures(self, failure_ratio, seed=0):
-
+        random.seed(seed)
+        G=self.nx_graph
+        # Find edges with the desired attribute
+        num_edges=len(G.edges())
+        edges_to_delete = [(u, v) for u, v, attrs in G.edges(data=True) if attrs['critical'] == True]
+        # Shuffle the list of edges to delete
+        random.shuffle(edges_to_delete)
+        # Select a random subset of edges to delete
+        num_edges_to_delete = int(failure_ratio * num_edges)
+        if num_edges_to_delete>len(edges_to_delete):
+            raise ValueError("not enough intergroup links to delete!")
+        
+        edges_to_delete = edges_to_delete[:num_edges_to_delete]
+        # Delete the selected edges
+        G.remove_edges_from(edges_to_delete)
+        print(f"{num_edges_to_delete} edge(s) has been deleted from inter-group edge list")
+        if not nx.is_connected(G):
+            raise ValueError("Graph is not connected after the deletions!")
         return
 
     def set_noncritical_link_failures(self, failure_ratio, seed=0):
-
+        random.seed(seed)
+        G=self.nx_graph
+        # Find edges with the desired attribute
+        num_edges=len(G.edges())
+        edges_to_delete = [(u, v) for u, v, attrs in G.edges(data=True) if attrs['critical'] == False]
+        # Shuffle the list of edges to delete
+        random.shuffle(edges_to_delete)
+        # Select a random subset of edges to delete
+        num_edges_to_delete = int(failure_ratio * num_edges)
+        if num_edges_to_delete>len(edges_to_delete):
+            raise ValueError("not enough intergroup links to delete!")
+        
+        edges_to_delete = edges_to_delete[:num_edges_to_delete]
+        # Delete the selected edges
+        G.remove_edges_from(edges_to_delete)
+        print(f"{num_edges_to_delete} edge(s) has been deleted from inter-group edge list")
+        if not nx.is_connected(G):
+            raise ValueError("Graph is not connected after the deletions!")
         return

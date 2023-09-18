@@ -1,15 +1,14 @@
-import topologies.DDF as DDF
+import topologies.Slimfly as Slimfly
 import globals as gl
 import lp_load_balancing.LP_gurobi as LP
 from statistics import mean
 
 #NUM_EXPERIMENTS=10
 
-config=(264, 11)
-# config=(114, 8)
-EPR=5
-topo='ddf'
-_network=DDF.DDFtopo(config[0], config[1])
+config=(162, 13)
+EPR=7
+topo='slimfly'
+_network=Slimfly.Slimflytopo(config[0], config[1])
 # TODO: define traffic pattern
 _traffic_matrix=gl.generate_uniform_traffic_pattern(config[0], EPR)
 R2R_traffic_matrix=gl.convert_p2p_traffic_matrix_to_R2R(_traffic_matrix, config[0], EPR)
@@ -47,7 +46,7 @@ LP_ASTP_4_average_path_diversity=[]
 
 for seed in range(NUM_EXPERIMENTS):
     # set link failures
-    _network=DDF.DDFtopo(config[0], config[1]) #reset network
+    _network=Slimfly.Slimflytopo(config[0], config[1]) #reset network
     _network.set_random_link_failures(link_failure_ratio, seed)
     # display(list(_network.nx_graph.edges()))
     _result, edge_list, path_dict=gl.calculate_data_shortest_paths(_network, config)
@@ -128,7 +127,7 @@ if LP_ASTP_4_saturation_load:
 
 
 link_failure_ratio=0.01
-print(f'==========results for inter-group link failure_ratio={link_failure_ratio} ============')
+print(f'==========results for critical link failure_ratio={link_failure_ratio} ============')
 diameter=[]
 average_path_length=[]
 average_path_diversity=[]
@@ -148,8 +147,8 @@ LP_ASTP_4_average_path_diversity=[]
 
 for seed in range(NUM_EXPERIMENTS):
     # set link failures
-    _network=DDF.DDFtopo(config[0], config[1]) #reset network
-    _network.set_intergroup_link_failures(link_failure_ratio, seed)
+    _network=Slimfly.Slimflytopo(config[0], config[1]) #reset network
+    _network.set_critical_link_failures(link_failure_ratio, seed)
     # display(list(_network.nx_graph.edges()))
     _result, edge_list, path_dict=gl.calculate_data_shortest_paths(_network, config)
     diameter.append(_result['diameter'])
@@ -229,7 +228,7 @@ if LP_ASTP_4_saturation_load:
 
 
 link_failure_ratio=0.01
-print(f'==========results for intra-group link failure_ratio={link_failure_ratio} ============')
+print(f'==========results for noncritical link failure_ratio={link_failure_ratio} ============')
 diameter=[]
 average_path_length=[]
 average_path_diversity=[]
@@ -249,8 +248,8 @@ LP_ASTP_4_average_path_diversity=[]
 
 for seed in range(NUM_EXPERIMENTS):
     # set link failures
-    _network=DDF.DDFtopo(config[0], config[1]) #reset network
-    _network.set_intragroup_link_failures(link_failure_ratio, seed)
+    _network=Slimfly.Slimflytopo(config[0], config[1]) #reset network
+    _network.set_noncritical_link_failures(link_failure_ratio, seed)
     # display(list(_network.nx_graph.edges()))
     _result, edge_list, path_dict=gl.calculate_data_shortest_paths(_network, config)
     diameter.append(_result['diameter'])

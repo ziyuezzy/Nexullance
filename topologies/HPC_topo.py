@@ -413,7 +413,7 @@ class HPC_topo:
         random.seed(seed)
         G=self.nx_graph
         # Get the list of edges in the graph
-        assert(0<failure_ratio<1)
+        assert(0<=failure_ratio<1)
         num_edges_to_delete=int(failure_ratio * G.number_of_edges())
         edges_to_delete = random.sample(G.edges(), num_edges_to_delete)
         # Delete the selected edges
