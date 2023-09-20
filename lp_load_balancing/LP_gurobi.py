@@ -7,7 +7,7 @@ options = {
     "LICENSEID": 2411299,
 }
 
-def Solve_load_balancing(path_dict, edge_list, traffic_matrix=[], _integer=False, _solver=0, _verbose=0):
+def Solve_load_balancing(path_dict, edge_list, traffic_matrix=[], maximum_prob=1.0, _solver=0, _verbose=0):
     #LP solver options:
     '''
     0: Automatic (solver chooses the method)
@@ -49,13 +49,10 @@ def Solve_load_balancing(path_dict, edge_list, traffic_matrix=[], _integer=False
 
             for path in paths:      
                 if len(paths)>1:  
-                    if _integer:
-                        path_prob[unique_path_id]=model.addVar(vtype=GRB.BINARY, name=f'path_prob_({s}, {d})_{unique_path_id}')
-                    else:
-                        path_prob[unique_path_id]=model.addVar(vtype=GRB.CONTINUOUS, name=f'path_prob_({s}, {d})_{unique_path_id}')
+                    path_prob[unique_path_id]=model.addVar(vtype=GRB.CONTINUOUS, name=f'path_prob_({s}, {d})_{unique_path_id}')
 
                     path_prob[unique_path_id].setAttr(GRB.Attr.LB, 0)  # Lower bound
-                    path_prob[unique_path_id].setAttr(GRB.Attr.UB, 1)  # Upper bound
+                    path_prob[unique_path_id].setAttr(GRB.Attr.UB, maximum_prob)  # Upper bound
                 else:
                     path_prob[unique_path_id]=1.0
 

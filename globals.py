@@ -1,6 +1,7 @@
 from statistics import mean
 import lp_load_balancing.LP_cvspy as LP_cvspy
 import numpy as np
+import random
 
 #Configurations:
 #slimfly configurations:
@@ -277,13 +278,13 @@ def convert_path_dict_to_weighted_path_dict(path_dict):
     return weighted_path_dict
 
 
-def convert_path_dict_to_weighted_path_dict_with_cost(path_dict):
-    weighted_path_dict={}
-    for (u,v), paths in path_dict.items():
-        weighted_path_dict[(u,v)]=[]
-        for path in paths:
-            weighted_path_dict[(u,v)].append( [path, 1/len(paths), -1] )
-    return weighted_path_dict
+# def convert_path_dict_to_weighted_path_dict_with_cost(path_dict):
+#     weighted_path_dict={}
+#     for (u,v), paths in path_dict.items():
+#         weighted_path_dict[(u,v)]=[]
+#         for path in paths:
+#             weighted_path_dict[(u,v)].append( [path, 1/len(paths), -1] )
+#     return weighted_path_dict
 
 
 def clean_up_weighted_paths(weighted_path_dict):
@@ -339,3 +340,28 @@ def convert_p2p_traffic_matrix_to_R2R(p2p_traffic_matrix, num_routers, EPs_per_r
             R2R_traffic_matrix[s][d]=sum_R2R_flow
 
     return R2R_traffic_matrix
+
+
+def evaluate_weighted_pathdict_LF_resilience(edgelist, weighted_path_dict, LFR, seed=0):
+    random.seed(seed)
+    # Get the list of edges in the graph
+    assert(0<=LFR<1)
+    num_edges_to_delete=int(LFR * len(edgelist))
+    edges_to_delete = random.sample(edgelist, num_edges_to_delete)
+
+    def path_is_broken(path):
+        links_in_path=[(path[i], path[i+1]) for i in range(len(path)-1)]
+        for (u,v) in edges_to_delete:
+            if ((u,v) in links_in_path) or ((v,u) in links_in_path):
+                return True
+            
+    success_rate={}    
+    #calculate the communication success rate statistics among s-d pairs
+    for (s,d), weighted_paths in weighted_path_dict.items():
+        success_rate[(s,d)]=0
+        for path, prob in weighted_paths:
+            if not path_is_broken(path):
+                success_rate[(s,d)]=success_rate[(s,d)]+prob
+
+    return mean(list(success_rate.values()))
+                    
