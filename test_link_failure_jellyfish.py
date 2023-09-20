@@ -73,7 +73,7 @@ for seed in range(NUM_EXPERIMENTS):
     print(f'With seed = {seed}, predicted saturation load = {LP_ASP_saturation_load[seed]}')
 
     if diameter[seed]<=3:
-        _, _, path_dict=gl.calculate_data_paths_within_length(_network, config, 3)
+        _, edge_list, path_dict=gl.calculate_data_paths_within_length(_network, config, 3)
         all_weighted_paths, result_link_loads=LP.Solve_load_balancing(path_dict, edge_list,R2R_traffic_matrix, _verbose=0)
         link_loads, local_link_load=_network.distribute_arbitrary_flow_on_weighted_paths_with_EPs(all_weighted_paths, EPR, _traffic_matrix)
         average_path_lengths, num_paths=gl.process_weighted_path_dict(all_weighted_paths)
@@ -88,7 +88,7 @@ for seed in range(NUM_EXPERIMENTS):
         print("network diameter is smaller than 3, ASTP-3 is skipped")
 
     if diameter[seed]<=4:
-        _, _, path_dict=gl.calculate_data_paths_within_length(_network, config, 4)
+        _, edge_list, path_dict=gl.calculate_data_paths_within_length(_network, config, 4)
         all_weighted_paths, result_link_loads=LP.Solve_load_balancing(path_dict, edge_list,R2R_traffic_matrix, _verbose=0)
         link_loads, local_link_load=_network.distribute_arbitrary_flow_on_weighted_paths_with_EPs(all_weighted_paths, EPR, _traffic_matrix)
         average_path_lengths, num_paths=gl.process_weighted_path_dict(all_weighted_paths)
