@@ -1,5 +1,5 @@
 from statistics import mean
-import lp_load_balancing.LP_cvspy as LP_cvspy
+import nexullance.LP_cvspy as LP_cvspy
 import numpy as np
 import random
 

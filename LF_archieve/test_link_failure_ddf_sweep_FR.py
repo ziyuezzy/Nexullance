@@ -1,6 +1,6 @@
 import topologies.DDF as DDF
 import globals as gl
-import lp_load_balancing.LP_gurobi as LP
+import nexullance.LP_gurobi as LP
 from statistics import mean
 
 #NUM_EXPERIMENTS=10

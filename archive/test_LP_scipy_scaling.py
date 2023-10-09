@@ -2,7 +2,7 @@ from globals import *
 import topologies.RRG as RRG
 import cvxpy as cp
 # import pickle
-import lp_load_balancing.LP_scipy as LP
+import nexullance.LP_scipy as LP
 import time
 import tracemalloc
 
