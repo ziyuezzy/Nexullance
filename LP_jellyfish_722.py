@@ -1,4 +1,4 @@
-import lp_load_balancing.LP_gurobi as LP
+import nexullance.LP_gurobi as LP
 import pickle
 import topologies.RRG as RRG
 import globals as gl
