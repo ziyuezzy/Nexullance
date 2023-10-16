@@ -6,3 +6,5 @@ pickled_data
 *.txt
 nexullance/*.ipynb
 archive/
+
+!nexullance/Convergent_Nexullance_routing.ipynb

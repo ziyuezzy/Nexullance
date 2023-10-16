@@ -290,6 +290,55 @@ class HPC_topo:
 
         return link_loads, min(local_link_load)
 
+
+    def distribute_arbitrary_flow_on_weighted_paths_with_EPs_return_dict(self, path_dict, p, traffic_matrix):
+        # traffic matrix should be a 2-D matrix
+        assert(len(traffic_matrix)==len(traffic_matrix[0])==self.nx_graph.number_of_nodes()*p and  'traffic matrix shape is wrong')
+
+        #p is the subscription of routers, meaning the number of EPs attached to one router
+        link_loads = {}
+        local_link_load = {}
+        # initialization
+        for u, v in list(self.nx_graph.edges()):
+            link_loads[(u, v)]=0
+            link_loads[(v, u)]=0
+        for u in list(self.nx_graph.nodes()):
+            for EP in range(p):
+                local_link_load[(u, -EP-1)]=0 # from router to EP #Note that the '-EP-1' is just for distinguish the EP ids from router ids
+                local_link_load[(-EP-1, u)]=0 # from EP to router
+        # start calculation
+        for u in list(self.nx_graph.nodes()):
+            for src_EP in range(p):
+                for v in list(self.nx_graph.nodes()):
+                    for dest_EP in range(p):
+                        if u==v and src_EP==dest_EP:
+                            continue
+                        #calculates the absolute id of src and dest EPs
+                        src_EP_abs=p*u+src_EP
+                        dest_EP_abs=p*v+dest_EP
+                        local_link_load[(-src_EP-1, u)]+=traffic_matrix[src_EP_abs][dest_EP_abs]
+                        local_link_load[(v, -dest_EP-1)]+=traffic_matrix[src_EP_abs][dest_EP_abs]
+                        if u!=v:
+                            paths=path_dict[(u, v)]
+                            check_sum=0
+                            for j, (path, weight) in enumerate(paths):
+                                if j == len(paths)-1:
+                                    w=1-check_sum
+                                    assert(abs(w-weight)<0.01)
+                                    for i in range(len(path) - 1):
+                                        vertex1, vertex2 = path[i], path[i + 1]
+                                        link_loads[(vertex1, vertex2)] += w*traffic_matrix[src_EP_abs][dest_EP_abs]
+                                else:
+                                    for i in range(len(path) - 1):
+                                        vertex1, vertex2 = path[i], path[i + 1]
+                                        link_loads[(vertex1, vertex2)] += weight*traffic_matrix[src_EP_abs][dest_EP_abs]
+                                    check_sum += weight
+
+        local_link_load = [ v for v in local_link_load.values()]
+        assert(min(local_link_load)==max(local_link_load))
+
+        return link_loads, min(local_link_load)
+
     def distribute_arbitrary_flow_on_paths_with_EPs(self, path_dict, p, traffic_matrix):
         # traffic matrix should be a 2-D matrix
         assert(len(traffic_matrix)==len(traffic_matrix[0])==self.nx_graph.number_of_nodes()*p and  'traffic matrix shape is wrong')
