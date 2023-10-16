@@ -4,6 +4,10 @@ nohup.out
 *.png
 pickled_data
 *.txt
-lp_load_balancing/*.ipynb
 *.html
 *.mp4
+nexullance/*.ipynb
+nexullance/Cut_Euler_uniform.py
+archive/
+
+!nexullance/Convergent_Nexullance_routing.ipynb
