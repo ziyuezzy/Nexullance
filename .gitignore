@@ -11,5 +11,6 @@ nexullance/*.ipynb
 archive/
 LF_archieve/
 bin/
+.vscode/
 
 !nexullance/Convergent_Nexullance_routing.ipynb
