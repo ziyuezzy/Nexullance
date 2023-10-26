@@ -7,7 +7,9 @@ pickled_data
 *.html
 *.mp4
 nexullance/*.ipynb
-nexullance/Cut_Euler_uniform.py
+# nexullance/Cut_Euler_uniform.py
 archive/
+LF_archieve/
+bin/
 
 !nexullance/Convergent_Nexullance_routing.ipynb
