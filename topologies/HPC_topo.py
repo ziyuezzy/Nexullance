@@ -3,7 +3,7 @@ import sys
 from itertools import islice
 from concurrent.futures import ThreadPoolExecutor
 from joblib import Parallel, delayed
-MAX_KERNELS = 6 # define maximum threads to run
+MAX_KERNELS = 1 # define maximum threads to run
 import numpy as np
 import random
 
@@ -174,6 +174,19 @@ class HPC_topo:
                 for i in range(len(path) - 1):
                     u, v = path[i], path[i + 1]
                     link_loads[(u, v)] += 1 / k
+        return link_loads
+    
+    def distribute_arbitrary_flow_on_paths(self, R2R_TM, path_dict):
+        link_loads = {}
+        for u, v in list(self.nx_graph.edges()):
+            link_loads[(u, v)]=0
+            link_loads[(v, u)]=0
+        for (s,d), paths in path_dict.items():
+            k = float(len(paths))
+            for path in paths:
+                for i in range(len(path) - 1):
+                    u, v = path[i], path[i + 1]
+                    link_loads[(u, v)] += R2R_TM[s][d] * 1 / k
         return link_loads
     
     def distribute_uniform_flow_on_weighted_paths(self, path_dict):
@@ -376,9 +389,9 @@ class HPC_topo:
 
         link_loads = [ v for v in link_loads.values()]
         local_link_load = [ v for v in local_link_load.values()]
-        assert(min(local_link_load)==max(local_link_load))
+        # assert(min(local_link_load)==max(local_link_load))
 
-        return link_loads, min(local_link_load)
+        return link_loads, local_link_load
 
     def distribute_uniform_flow_on_paths_with_EP(self, path_dict, p):
         #p is the subscription of routers, meaning the number of EPs attached to one router

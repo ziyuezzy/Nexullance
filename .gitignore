@@ -9,5 +9,5 @@ pickled_data
 nexullance/*.ipynb
 nexullance/Cut_Euler_uniform.py
 archive/
-
-!nexullance/Convergent_Nexullance_routing.ipynb
+CIDD_archieve/
+nexullance_scaling/

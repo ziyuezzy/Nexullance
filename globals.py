@@ -326,6 +326,25 @@ def generate_shift_traffic_pattern(num_routers, EPs_per_router):
 
     return traffic_matrix
 
+
+def generate_all_reduce_traffic_pattern(num_routers, EPs_per_router, _center):
+    # center as the center of all-reduce operation
+    total_num_EP=EPs_per_router*num_routers
+    traffic_matrix=np.zeros((total_num_EP, total_num_EP))
+    for i in range(total_num_EP):
+        if i != _center:
+            traffic_matrix[i][_center]=1
+    return traffic_matrix
+
+def generate_broadcast_traffic_pattern(num_routers, EPs_per_router, _center):
+    # center as the center of the broadcast operation
+    total_num_EP=EPs_per_router*num_routers
+    traffic_matrix=np.zeros((total_num_EP, total_num_EP))
+    for i in range(total_num_EP):
+        if i != _center:
+            traffic_matrix[_center][i]=1
+    return traffic_matrix
+
 def convert_p2p_traffic_matrix_to_R2R(p2p_traffic_matrix, num_routers, EPs_per_router):
     assert(len(p2p_traffic_matrix)==len(p2p_traffic_matrix[0])==num_routers*EPs_per_router)
     R2R_traffic_matrix=np.zeros((num_routers, num_routers))
@@ -365,3 +384,18 @@ def evaluate_weighted_pathdict_LF_resilience(edgelist, weighted_path_dict, LFR, 
 
     return mean(list(success_rate.values()))
                     
+def local_link_loads_from_p2p_TM(p2p_TM):
+    local_link_loads=[]
+    p2p_TM=np.array(p2p_TM)
+    for row in p2p_TM:
+        local_link_loads.append(np.sum(row))
+    for row in p2p_TM.swapaxes(0,1):
+        local_link_loads.append(np.sum(row))
+    return local_link_loads
+
+# TODO: alternative way of evaluting the throughput of the network:
+# 1. Total amount of flows that are served/ total amount of bandwidth resource in the network
+# 2. Aerage link utilization ratio of the network                     
+# def total_served_flow(p2p_traffic_pattern, link_bw_dict, link_load_dict):
+
+
