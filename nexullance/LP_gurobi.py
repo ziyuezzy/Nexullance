@@ -83,6 +83,7 @@ def Solve_load_balancing(path_dict, edge_list, traffic_matrix=[], maximum_prob=1
         # model.setParam(GRB.Param.IterationLimit, 2)
         env.setParam('Threads', 1)    #Limit the number of cores used according to the license
         model.setParam(GRB.Param.Method, _solver)  
+        model.setParam(GRB.Param.Crossover, 0)  
         # Optimize the model
         model.optimize()
         

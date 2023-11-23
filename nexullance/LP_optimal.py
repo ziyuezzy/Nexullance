@@ -98,6 +98,7 @@ def Solve_load_balancing(nx_graph, R2R_TM=[], _solver=0, _verbose=0):
         # model.setParam(GRB.Param.IterationLimit, 2)
         env.setParam('Threads', NUM_threads)    #Limit the number of cores used according to the license
         model.setParam(GRB.Param.Method, _solver)  
+        model.setParam(GRB.Param.Crossover, 0)  
         # Optimize the model
         model.optimize()
 
@@ -116,10 +117,15 @@ def Solve_load_balancing(nx_graph, R2R_TM=[], _solver=0, _verbose=0):
                     traffic_shared[(s, d)][(j, i)]=link_share_var[(j, i)][(s, d)].x
 
 
-        for (u, v), load in link_load_var.items():
-            result_link_loads[(u,v)]=load.x
+            for (u, v), load in link_load_var.items():
+                result_link_loads[(u,v)]=load.x
 
-        Max_load_result=Max_load.x
-        print(f'Max link load is: {Max_load.x}')
+            Max_load_result=Max_load.x
+            print(f'Max link load is: {Max_load.x}')
 
-    return traffic_shared, result_link_loads, Max_load_result
+            return traffic_shared, result_link_loads, Max_load_result
+        
+        else:
+            print("LP failed")
+            model.setParam(GRB.Param.OutputFlag, 1)
+            model.printStats()
