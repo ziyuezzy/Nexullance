@@ -299,9 +299,9 @@ class HPC_topo:
 
         link_loads = [ v for v in link_loads.values()]
         local_link_load = [ v for v in local_link_load.values()]
-        assert(min(local_link_load)==max(local_link_load))
+        # assert(min(local_link_load)==max(local_link_load))
 
-        return link_loads, min(local_link_load)
+        return link_loads, local_link_load
 
 
     def distribute_arbitrary_flow_on_weighted_paths_with_EPs_return_dict(self, path_dict, p, traffic_matrix):

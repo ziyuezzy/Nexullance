@@ -2,8 +2,8 @@ import gurobipy as gp
 from gurobipy import GRB
 
 options = {
-    "WLSACCESSID": "6f6ff6a8-32e2-447d-b681-592b24fc09d1",
-    "WLSSECRET": "333995b6-ce3f-4053-b4bf-7dcdb2b167df",
+    "WLSACCESSID": "98bc137f-bbf8-49c8-afec-4011ef50faae",
+    "WLSSECRET": "a4c4f9db-3f50-4544-a360-a0e1f17f9130",
     "LICENSEID": 2411299,
 }
 

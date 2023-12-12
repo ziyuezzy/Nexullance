@@ -10,5 +10,13 @@ While GDBG is implemented separately because of its di-graph nature.
 # Nexullance
 
 # TODOs: 
-classify path selections from the results of Nexullance.
-Analyse seperately for ddf, slimfly, and jellyfish.
+
+for Nexullance_IT, try new things for approaching the optimality:
+1. wrap up the heuristic
+2. add new cost function cost(link)=alpha+load(link)^beta
+Try to use Bayesian Optimization to fine tune the heuristic parameters
+
+https://github.com/bayesian-optimization/BayesianOptimization
+
+3. change the initial point of the algorithm
+

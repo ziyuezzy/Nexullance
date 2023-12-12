@@ -79,7 +79,6 @@ def count_disjoint_paths(paths_dict):
     return disjoint_paths_count, disjoint_paths_ratio
 
 
-
 def calculate_data_shortest_paths(topology_instance, config):
     _diameter=topology_instance.calculate_diameter()
     paths_dict=topology_instance.calculate_all_shortest_paths()
@@ -309,8 +308,6 @@ def clean_up_weighted_paths(weighted_path_dict):
     return clean_weighted_path_dict
 
 
-
-
 def generate_uniform_traffic_pattern(num_routers, EPs_per_router):
     total_num_EP=EPs_per_router*num_routers
     traffic_matrix=np.ones((total_num_EP, total_num_EP))
@@ -324,6 +321,34 @@ def generate_shift_traffic_pattern(num_routers, EPs_per_router):
     for i in range(total_num_EP):
         traffic_matrix[i][(i+total_num_EP//2)%total_num_EP]=1
 
+    return traffic_matrix
+
+def generate_uniform_cluster_pattern(num_routers, EPs_per_router):
+    total_num_EP=EPs_per_router*num_routers
+    traffic_matrix=np.zeros((total_num_EP, total_num_EP))
+    for e in range(EPs_per_router):
+        for i in range(num_routers):
+            for j in range(num_routers):
+                if i != j :
+                    traffic_matrix[i*EPs_per_router+e][j*EPs_per_router+e]=1
+    return traffic_matrix
+
+def generate_random_cluster_pattern(num_routers, EPs_per_router, num_clusters=None, seed=0):
+    if num_clusters==None:
+        num_clusters=num_routers
+    random.seed(seed)
+    total_num_EP=EPs_per_router*num_routers
+    EPs_per_cluster = total_num_EP//num_clusters
+    traffic_matrix=np.zeros((total_num_EP, total_num_EP))
+    EPs=list(range(total_num_EP))
+    while EPs:
+        cluster=random.sample(EPs, EPs_per_cluster)
+        for v in cluster:
+            for u in cluster:
+                if v!=u:
+                    traffic_matrix[v][u]=1
+        for v in cluster:
+            EPs.remove(v)  
     return traffic_matrix
 
 
@@ -395,7 +420,40 @@ def local_link_loads_from_p2p_TM(p2p_TM):
 
 # TODO: alternative way of evaluting the throughput of the network:
 # 1. Total amount of flows that are served/ total amount of bandwidth resource in the network
-# 2. Aerage link utilization ratio of the network                     
+# 2. Average link utilization ratio of the network                     
 # def total_served_flow(p2p_traffic_pattern, link_bw_dict, link_load_dict):
 
 
+# automorphism methods using nauty
+
+import pynauty as nauty
+
+def generate_nauty_graph_from_nx(nx_graph):
+    adj_dict={n: list(nbrdict.keys()) for n, nbrdict in nx_graph.adjacency()}
+    nauty_graph=nauty.Graph(nx_graph.number_of_nodes(), directed=False, adjacency_dict=adj_dict)
+    return nauty_graph
+
+def nauty_autgrp_verbose(nauty_graph, _verbose=True):
+    # Compute the automorphism group
+    aut_group = nauty.autgrp(nauty_graph)
+
+    # Extract elements from the output tuple
+    generators, grpsize1, grpsize2, orbits, numorbits = aut_group
+
+    if _verbose:
+        # Print the generators of the automorphism group
+        print("Generators of the automorphism group:")
+        print(generators)
+
+        print("Size of the generator set:", len(generators))
+
+        # print the size (order) of the group
+        print("Size (order) of the automorphism group:", grpsize1*10**grpsize2)
+
+        # Print the orbits of the vertices
+        print("Orbits of the vertices:", orbits)
+
+        # Print the number of orbits
+        print("Number of orbits:", numorbits)
+
+    return generators
