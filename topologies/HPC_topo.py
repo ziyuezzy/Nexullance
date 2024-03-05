@@ -7,9 +7,31 @@ MAX_KERNELS = 1 # define maximum threads to run
 import numpy as np
 import random
 
+
 #TODO: check "bfs", "all_pairs_shortest_path" and "Floyd–Warshall algorithm", for speeding up the methods
 
-class HPC_topo:
+class HPC_topo():
+    
+    @classmethod
+    def import_child_classes(cls):
+        from .DDF import DDFtopo
+        from .Slimfly import Slimflytopo
+        from .Equality import Equalitytopo
+        from .RRG import RRGtopo
+
+    @classmethod
+    def get_child_classes(cls):
+        cls.import_child_classes();
+        return [sub.__name__ for sub in cls.__subclasses__()]
+    
+    @classmethod
+    def initialize_child_instance(cls, child_class_name, *args, **kwargs):
+        child_classes = cls.__subclasses__()
+        for sub in child_classes:
+            if sub.__name__ == child_class_name:
+                return sub(*args, **kwargs)
+        raise ValueError(f"Class {child_class_name} not found as a child of {cls.__name__}")
+
     def __init__(self):
         self.nx_graph = nx.Graph()
         self.diameter = None
@@ -41,7 +63,7 @@ class HPC_topo:
                 raise ValueError(f"Error, no path found between vertex {v1} and vertex {v2}")
             paths_dict[(v1, v2)] = all_paths
 
-        return paths_dict
+        return paths_dict, f"{k}_SP"
 
     def calculate_all_paths_within_length(self, max_length): # a single-thread version
         assert(max_length >= self.calculate_diameter())
@@ -61,7 +83,7 @@ class HPC_topo:
             if not all_paths:
                 raise ValueError(f"Error, no path found between vertex {v1} and vertex {v2}")
             paths_dict[(v1, v2)]=all_paths
-        return paths_dict
+        return paths_dict, f"APST_{max_length}"
     
     def calculate_all_paths_within_length_parallel(self, max_length): # a parallel version of the above algorithm
         assert max_length >= self.calculate_diameter()
@@ -93,43 +115,8 @@ class HPC_topo:
                 raise ValueError(f"Error, no path found between vertex {v1} and vertex {v2}")
             paths_dict[(v1, v2)] = all_paths
 
-        return paths_dict
+        return paths_dict, f"APST_{max_length}"
     
-    # def calculate_all_paths_within_length_parallel_2(self, max_length): 
-    #     #another parallel algorithm by chatgpt, using iterative DFS to avoid memory overhead
-    #     assert max_length >= self.calculate_diameter()
-
-    #     def iterative_dfs_paths(start, end, max_length):
-    #         stack = [(start, [start])]
-    #         all_paths = []
-    #         while stack:
-    #             node, path = stack.pop()
-    #             if node == end:
-    #                 all_paths.append(path)
-    #             elif len(path) < max_length + 1:
-    #                 for neighbor in self.nx_graph.neighbors(node):
-    #                     if neighbor not in path:
-    #                         stack.append((neighbor, path + [neighbor]))
-    #         return all_paths
-
-    #     vertex_pairs = [(v1, v2) for v1 in self.nx_graph.nodes() for v2 in self.nx_graph.nodes() if v1 != v2]
-
-    #     # Calculate the paths in parallel
-    #     results = Parallel(n_jobs=MAX_KERNELS)(
-    #         delayed(iterative_dfs_paths)(v1, v2, max_length) for v1, v2 in vertex_pairs
-    #     )
-
-    #     # Process the results as needed
-    #     paths_dict = {}
-    #     for (v1, v2), all_paths in zip(vertex_pairs, results):
-    #         if not all_paths:
-    #             raise ValueError(f"Error, no path found between vertex {v1} and vertex {v2}")
-    #         paths_dict[(v1, v2)] = all_paths
-    #         # print(f"number of paths found for s-d ({v1}, {v2}) is {len(all_paths)}")
-
-    #     return paths_dict
-
-
     def calculate_all_shortest_paths(self): 
         vertices = self.nx_graph.nodes()
         vertex_pairs = [(v1, v2) for v1 in vertices for v2 in vertices if v1 != v2]
@@ -148,14 +135,14 @@ class HPC_topo:
                 raise ValueError(f"Error, no path found between vertex {v1} and vertex {v2}")
             paths_dict[(v1, v2)] = all_paths
 
-        return paths_dict
+        return paths_dict, "ASP"
 
     def calculate_diameter(self):
         if self.diameter:
             return self.diameter
         else:
             #let k = 1, the shortest paths are calculated
-            shortest_path_dict = self.calculate_all_k_shortest_paths(1) 
+            shortest_path_dict, _ = self.calculate_all_k_shortest_paths(1) 
             shortest_path_lengths=[]
             for shortest_path in shortest_path_dict.values():
                 shortest_path_lengths.append(len(shortest_path[0])-1)
@@ -189,7 +176,48 @@ class HPC_topo:
                     link_loads[(u, v)] += R2R_TM[s][d] * 1 / k
         return link_loads
     
-    def distribute_uniform_flow_on_weighted_paths(self, path_dict):
+    def distribute_arbitrary_flow_on_paths_with_EPs(self, path_dict, p, traffic_matrix):
+        # traffic matrix should be a 2-D matrix
+        assert(len(traffic_matrix)==len(traffic_matrix[0])==self.nx_graph.number_of_nodes()*p and  'traffic matrix shape is wrong')
+
+        #p is the subscription of routers, meaning the number of EPs attached to one router
+        link_loads = {}
+        local_link_load = {}
+        # initialization
+        for u, v in list(self.nx_graph.edges()):
+            link_loads[(u, v)]=0
+            link_loads[(v, u)]=0
+        for u in list(self.nx_graph.nodes()):
+            for EP in range(p):
+                local_link_load[(u, -EP-1)]=0 # from router to EP #Note that the '-EP-1' is just for distinguish the EP ids from router ids
+                local_link_load[(-EP-1, u)]=0 # from EP to router
+        # start calculation
+        for u in list(self.nx_graph.nodes()):
+            for src_EP in range(p):
+                for v in list(self.nx_graph.nodes()):
+                    for dest_EP in range(p):
+                        if u==v and src_EP==dest_EP:
+                            continue
+                        #calculates the absolute id of src and dest EPs
+                        src_EP_abs=p*u+src_EP
+                        dest_EP_abs=p*v+dest_EP
+                        local_link_load[(-src_EP-1, u)]+=traffic_matrix[src_EP_abs][dest_EP_abs]
+                        local_link_load[(v, -dest_EP-1)]+=traffic_matrix[src_EP_abs][dest_EP_abs]
+                        if u!=v:
+                            paths=path_dict[(u, v)]
+                            k = float(len(paths))
+                            for path in paths:
+                                for i in range(len(path) - 1):
+                                    vertex1, vertex2 = path[i], path[i + 1]
+                                    link_loads[(vertex1, vertex2)] += traffic_matrix[src_EP_abs][dest_EP_abs] * 1 / k 
+
+        link_loads = [ v for v in link_loads.values()]
+        local_link_load = [ v for v in local_link_load.values()]
+        # assert(min(local_link_load)==max(local_link_load))
+
+        return link_loads, local_link_load
+
+    def distribute_uniform_flow_on_weighted_paths(self, path_dict): # equivalent to '1 EP per router'
         link_loads = {}
         for u, v in list(self.nx_graph.edges()):
             link_loads[(u, v)]=0
@@ -253,7 +281,6 @@ class HPC_topo:
 
         return link_loads, min(local_link_load)
 
-
     def distribute_arbitrary_flow_on_weighted_paths_with_EPs(self, path_dict, p, traffic_matrix):
         # traffic matrix should be a 2-D matrix
         assert(len(traffic_matrix)==len(traffic_matrix[0])==self.nx_graph.number_of_nodes()*p and  'traffic matrix shape is wrong')
@@ -303,7 +330,6 @@ class HPC_topo:
 
         return link_loads, local_link_load
 
-
     def distribute_arbitrary_flow_on_weighted_paths_with_EPs_return_dict(self, path_dict, p, traffic_matrix):
         # traffic matrix should be a 2-D matrix
         assert(len(traffic_matrix)==len(traffic_matrix[0])==self.nx_graph.number_of_nodes()*p and  'traffic matrix shape is wrong')
@@ -352,109 +378,25 @@ class HPC_topo:
 
         return link_loads, min(local_link_load)
 
-    def distribute_arbitrary_flow_on_paths_with_EPs(self, path_dict, p, traffic_matrix):
-        # traffic matrix should be a 2-D matrix
-        assert(len(traffic_matrix)==len(traffic_matrix[0])==self.nx_graph.number_of_nodes()*p and  'traffic matrix shape is wrong')
+    # def distribute_uniform_random_flow_on_paths(self, path_dict, std ,seed=0):
+    #     #std is the standard deviation of the uniform random distribution
+    #     link_loads = {}
+    #     for u, v in list(self.nx_graph.edges()):
+    #         link_loads[(u, v)]=0
+    #         link_loads[(v, u)]=0
 
-        #p is the subscription of routers, meaning the number of EPs attached to one router
-        link_loads = {}
-        local_link_load = {}
-        # initialization
-        for u, v in list(self.nx_graph.edges()):
-            link_loads[(u, v)]=0
-            link_loads[(v, u)]=0
-        for u in list(self.nx_graph.nodes()):
-            for EP in range(p):
-                local_link_load[(u, -EP-1)]=0 # from router to EP #Note that the '-EP-1' is just for distinguish the EP ids from router ids
-                local_link_load[(-EP-1, u)]=0 # from EP to router
-        # start calculation
-        for u in list(self.nx_graph.nodes()):
-            for src_EP in range(p):
-                for v in list(self.nx_graph.nodes()):
-                    for dest_EP in range(p):
-                        if u==v and src_EP==dest_EP:
-                            continue
-                        #calculates the absolute id of src and dest EPs
-                        src_EP_abs=p*u+src_EP
-                        dest_EP_abs=p*v+dest_EP
-                        local_link_load[(-src_EP-1, u)]+=traffic_matrix[src_EP_abs][dest_EP_abs]
-                        local_link_load[(v, -dest_EP-1)]+=traffic_matrix[src_EP_abs][dest_EP_abs]
-                        if u!=v:
-                            paths=path_dict[(u, v)]
-                            k = float(len(paths))
-                            for path in paths:
-                                for i in range(len(path) - 1):
-                                    vertex1, vertex2 = path[i], path[i + 1]
-                                    link_loads[(vertex1, vertex2)] += traffic_matrix[src_EP_abs][dest_EP_abs] * 1 / k 
-
-        link_loads = [ v for v in link_loads.values()]
-        local_link_load = [ v for v in local_link_load.values()]
-        # assert(min(local_link_load)==max(local_link_load))
-
-        return link_loads, local_link_load
-
-    def distribute_uniform_flow_on_paths_with_EP(self, path_dict, p):
-        #p is the subscription of routers, meaning the number of EPs attached to one router
-        link_loads = {}
-        local_link_load = {}
-        # initialization
-        for u, v in list(self.nx_graph.edges()):
-            link_loads[(u, v)]=0
-            link_loads[(v, u)]=0
-        for u in list(self.nx_graph.nodes()):
-            for EP in range(p):
-                local_link_load[(u, -EP-1)]=0 # from router to EP #Note that the '-EP-1' is just for distinguish the EP ids from router ids
-                local_link_load[(-EP-1, u)]=0 # from EP to router
-        # start calculation
-        for u in list(self.nx_graph.nodes()):
-            for src_EP in range(p):
-                for v in list(self.nx_graph.nodes()):
-                    for dest_EP in range(p):
-                        if u==v and src_EP==dest_EP:
-                            continue
-                        local_link_load[(u, -src_EP-1)]+=1
-                        local_link_load[(-dest_EP-1, v)]+=1
-                        if u!=v:
-                            paths=path_dict[(u, v)]
-                            k = float(len(paths))
-                            for path in paths:
-                                for i in range(len(path) - 1):
-                                    vertex1, vertex2 = path[i], path[i + 1]
-                                    link_loads[(vertex1, vertex2)] += 1 / k
-
-        # #calculate total flow and normalize the link load numbers
-        # total_flows = self.nx_graph.number_of_nodes()*p * (self.nx_graph.number_of_nodes()*p-1)
-        # link_occupancy_rate=[v / total_flows for v in link_loads.values()]
-        # local_link_occupancy_rate=[v / total_flows for v in local_link_load.values()]
-
-        link_loads = [ v for v in link_loads.values()]
-        local_link_load = [ v for v in local_link_load.values()]
-        assert(min(local_link_load)==max(local_link_load))
-
-        return link_loads, min(local_link_load)
-        # return link_occupancy_rate, local_link_occupancy_rate, link_loads, local_link_load
-                
-
-
-    def distribute_uniform_random_flow_on_paths(self, path_dict, std ,seed=0):
-        #std is the standard deviation of the uniform random distribution
-        link_loads = {}
-        for u, v in list(self.nx_graph.edges()):
-            link_loads[(u, v)]=0
-            link_loads[(v, u)]=0
-
-        np.random.seed(seed)
-        normal_dist = np.random.normal(1, std, len(link_loads))
-        for i in len(link_loads):
-            if normal_dist[i] < 0:
-                normal_dist[i] = 0
-        for count, paths in enumerate(path_dict.values()):
-            k = float(len(paths))
-            for path in paths:
-                for i in range(len(path) - 1):
-                    u, v = path[i], path[i + 1]
-                    link_loads[(u, v)] += normal_dist[count] / k
-        return link_loads
+    #     np.random.seed(seed)
+    #     normal_dist = np.random.normal(1, std, len(link_loads))
+    #     for i in len(link_loads):
+    #         if normal_dist[i] < 0:
+    #             normal_dist[i] = 0
+    #     for count, paths in enumerate(path_dict.values()):
+    #         k = float(len(paths))
+    #         for path in paths:
+    #             for i in range(len(path) - 1):
+    #                 u, v = path[i], path[i + 1]
+    #                 link_loads[(u, v)] += normal_dist[count] / k
+    #     return link_loads
     
     # def s_d_bw_dist(self, paths_dict, link_load_dict):
     #     bw_dict={}
