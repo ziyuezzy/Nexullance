@@ -138,7 +138,7 @@ from scipy.optimize import linprog
 #     print("=============calculation done===========")
 
 #     all_weighted_paths={}
-#     link_loads=[]
+#     link_flows=[]
 
 #     print("Optimal objective funtion found: %s" % optimal_Y)
 #     for i, variable in enumerate(optimal_variables):
@@ -148,8 +148,8 @@ from scipy.optimize import linprog
 #                 all_weighted_paths[(source, dest)]=[]
 #             all_weighted_paths[(source, dest)].append( (data[i][1], variable) )
 #         elif i < num_paths+num_links:
-#             link_loads.append(variable)
-#     return all_weighted_paths, link_loads
+#             link_flows.append(variable)
+#     return all_weighted_paths, link_flows
 
 
 def Solve_load_balancing(path_dict, edge_list, traffic_matrix=[], _integer=False, _solver='highs-ds', _options={'disp': True}):
@@ -158,7 +158,7 @@ def Solve_load_balancing(path_dict, edge_list, traffic_matrix=[], _integer=False
     assert(num_routers.is_integer() and 'length of path_dict should be N*(N-1), N is the number of routers')
     
     if list(traffic_matrix):
-        assert(len(traffic_matrix)==len(traffic_matrix[0])==num_routers and  'traffic matrix shape is wrong, note that this should be a R2R traffic matrix!')
+        assert(len(traffic_matrix)==len(traffic_matrix[0])==num_routers and  'traffic matrix shape is wrong, note that this should be a M_R traffic matrix!')
     else:
         traffic_matrix=[[1 for j in range(int(num_routers))] for i in range(int(num_routers))]# default traffic pattern is uniform
         for i in range(int(num_routers)): 
@@ -276,7 +276,7 @@ def Solve_load_balancing(path_dict, edge_list, traffic_matrix=[], _integer=False
     print("=============calculation done===========")
 
     all_weighted_paths={}
-    link_loads=[]
+    link_flows=[]
 
     print("Optimal objective funtion found: %s" % optimal_Y)
     for i, variable in enumerate(optimal_variables):
@@ -286,5 +286,5 @@ def Solve_load_balancing(path_dict, edge_list, traffic_matrix=[], _integer=False
                 all_weighted_paths[(source, dest)]=[]
             all_weighted_paths[(source, dest)].append( (data[i][1], variable) )
         elif i < num_paths+num_links:
-            link_loads.append(variable)
-    return all_weighted_paths, link_loads
+            link_flows.append(variable)
+    return all_weighted_paths, link_flows

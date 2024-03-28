@@ -9,7 +9,7 @@ options = {
     "LICENSEID": 2411299,
 }
 
-def Solve_load_balancing(nx_graph, R2R_TM=[], _solver=0, _verbose=0):
+def Solve_load_balancing(nx_graph, M_R=[], _solver=0, _verbose=0):
     #LP solver options:
     '''
     0: Automatic (solver chooses the method)
@@ -25,12 +25,12 @@ def Solve_load_balancing(nx_graph, R2R_TM=[], _solver=0, _verbose=0):
     edge_list = list(nx_graph.edges())
 
     num_routers= nx_graph.number_of_nodes()
-    if list(R2R_TM):
-        assert(len(R2R_TM)==len(R2R_TM[0])==num_routers and  'traffic matrix shape is wrong, note that this should be a R2R traffic matrix!')
+    if list(M_R):
+        assert(len(M_R)==len(M_R[0])==num_routers and  'traffic matrix shape is wrong, note that this should be a M_R traffic matrix!')
     else:
-        R2R_TM=[[1 for j in range(int(num_routers))] for i in range(int(num_routers))]# default traffic pattern is uniform
+        M_R=[[1 for j in range(int(num_routers))] for i in range(int(num_routers))]# default traffic pattern is uniform
         for i in range(int(num_routers)): 
-            R2R_TM[i][i]=0
+            M_R[i][i]=0
 
     with gp.Env(params=options) as env, gp.Model(env=env) as model:
         # Define variables
@@ -75,7 +75,7 @@ def Solve_load_balancing(nx_graph, R2R_TM=[], _solver=0, _verbose=0):
                     assert(((i, j) in edge_list) or ((j, i) in edge_list))
                     conservation+=link_share_var[(i, j)][(s, d)]
                     conservation-=link_share_var[(j, i)][(s, d)]
-                    link_load_expression[(i, j)]+=link_share_var[(i, j)][(s, d)]*R2R_TM[s][d]
+                    link_load_expression[(i, j)]+=link_share_var[(i, j)][(s, d)]*M_R[s][d]
                 if i == s:
                     conservation-=1
                 if i == d:
@@ -103,7 +103,7 @@ def Solve_load_balancing(nx_graph, R2R_TM=[], _solver=0, _verbose=0):
         model.optimize()
 
         traffic_shared = {} #{(s, d): {link (i->j): shared value}}
-        result_link_loads={}
+        result_link_flows={}
         if model.status == GRB.OPTIMAL:
             print("Optimal solution found")
             if _verbose:
@@ -118,12 +118,12 @@ def Solve_load_balancing(nx_graph, R2R_TM=[], _solver=0, _verbose=0):
 
 
             for (u, v), load in link_load_var.items():
-                result_link_loads[(u,v)]=load.x
+                result_link_flows[(u,v)]=load.x
 
             Max_load_result=Max_load.x
             print(f'Max link load is: {Max_load.x}')
 
-            return traffic_shared, result_link_loads, Max_load_result
+            return traffic_shared, result_link_flows, Max_load_result
         
         else:
             print("LP failed")

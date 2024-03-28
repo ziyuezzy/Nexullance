@@ -27,13 +27,13 @@ class GDBG_topo(HPC_topo.HPC_topo):
             raise ValueError('Input arguements not accepted.')
 
     def distribute_uniform_flow_on_paths(self, path_dict):
-        link_loads = {}
+        link_flows = {}
         for u, v in list(self.nx_graph.edges()):
-            link_loads[(u, v)]=0
+            link_flows[(u, v)]=0
         for paths in path_dict.values():
             k = float(len(paths))
             for path in paths:
                 for i in range(len(path) - 1):
                     u, v = path[i], path[i + 1]
-                    link_loads[(u, v)] += 1 / k
-        return link_loads
+                    link_flows[(u, v)] += 1 / k
+        return link_flows

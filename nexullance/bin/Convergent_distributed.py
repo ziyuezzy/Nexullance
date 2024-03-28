@@ -2,22 +2,20 @@ import globals as gl
 import numpy as np
 import matplotlib.pyplot as plt
 
-
-
 def load_len_cost_func(path, max_edge_load):
     return max_edge_load*len(path)
     
 def Convergent_Distributed_LB(weighted_path_dict, network_instance, EPR, cost_func=load_len_cost_func, 
-        p2p_traffic_matrix=[], max_prob_transfer=0.1, num_iterations=500, _plot=True, transfer_threshold=0.05, always_sync=False):
-    link_loads, local_link_load=network_instance.distribute_arbitrary_flow_on_weighted_paths_with_EPs_return_dict(
-                                            weighted_path_dict, EPR, p2p_traffic_matrix)
+        M_EPs=[], max_prob_transfer=0.1, num_iterations=500, _plot=True, transfer_threshold=0.05, always_sync=False):
+    link_flows, local_link_flows=network_instance.distribute_arbitrary_flow_on_weighted_paths_with_EPs_return_dict(
+                                            weighted_path_dict, EPR, M_EPs)
     # define Cost = len(path)*max(edge loads)
-    max_link_load=max(link_loads.values())
-    initial_mu=local_link_load/max_link_load
+    max_link_load=max(link_flows.values())
+    initial_mu=local_link_flows/max_link_load
     plot_y_data=[]
     plot_x_data=[]
 
-    R2R_TM=gl.convert_p2p_traffic_matrix_to_R2R(p2p_traffic_matrix,
+    M_R=gl.convert_M_EPs_to_M_R(M_EPs,
                 network_instance.nx_graph.number_of_nodes(), EPR)
     data={} # {(s, d): [[path], prob, max link load, cost]}
     for (s, d), weighted_paths in weighted_path_dict.items():
@@ -25,8 +23,8 @@ def Convergent_Distributed_LB(weighted_path_dict, network_instance, EPR, cost_fu
         for path, prob in weighted_paths:
             max_edge_load = 0
             for i in range(len(path)-1):
-                if max_edge_load < link_loads[(path[i], path[i+1])]:
-                    max_edge_load=link_loads[(path[i], path[i+1])]
+                if max_edge_load < link_flows[(path[i], path[i+1])]:
+                    max_edge_load=link_flows[(path[i], path[i+1])]
             
             data[(s, d)].append([path, prob, max_edge_load, cost_func(path, max_edge_load)])
 
@@ -35,13 +33,13 @@ def Convergent_Distributed_LB(weighted_path_dict, network_instance, EPR, cost_fu
         assert(-1<=increment_prob<=1)
         data_list[1]+=increment_prob
         assert(0<=data_list[1]<=1)
-        data_list[2]+=increment_prob*R2R_TM[(s, d)]
+        data_list[2]+=increment_prob*M_R[(s, d)]
         data_list[3]=cost_func(data_list[0], data_list[2])
 
     for it in range(num_iterations):
         for (s, d), data_lists in data.items():
 
-            if R2R_TM[s][d] == 0:
+            if M_R[s][d] == 0:
                 continue
 
             if len(data_lists)==1:
@@ -87,7 +85,7 @@ def Convergent_Distributed_LB(weighted_path_dict, network_instance, EPR, cost_fu
                                 (1 - min_cost_path_prob),
                                 max_cost_path_prob])
             if max_cost_path_load>min_cost_path_load:
-                prob_to_transfer=min([prob_to_transfer, (max_cost_path_load-min_cost_path_load)/R2R_TM[s][d]/2])
+                prob_to_transfer=min([prob_to_transfer, (max_cost_path_load-min_cost_path_load)/M_R[s][d]/2])
             # TODO: also include the secondary maximal path load? (for monotonic growth)
             assert(0.0<=prob_to_transfer<=1.0)
 
@@ -102,16 +100,16 @@ def Convergent_Distributed_LB(weighted_path_dict, network_instance, EPR, cost_fu
                         if data_list[1] != weighted_path_dict[(s, d)][i][1]:
                             weighted_path_dict[(s, d)][i]=(weighted_path_dict[(s, d)][i][0], data_list[1])
 
-                link_loads, local_link_load=network_instance.distribute_arbitrary_flow_on_weighted_paths_with_EPs_return_dict(
-                                                        weighted_path_dict, EPR, p2p_traffic_matrix)
-                max_link_load=max(link_loads.values())
+                link_flows, local_link_flows=network_instance.distribute_arbitrary_flow_on_weighted_paths_with_EPs_return_dict(
+                                                        weighted_path_dict, EPR, M_EPs)
+                max_link_load=max(link_flows.values())
                 for (s, d), data_lists in data.items():
                     for i, data_list in enumerate(data_lists):
                         path=data_list[0]
                         max_edge_load = 0
                         for i in range(len(path)-1):
-                            if max_edge_load < link_loads[(path[i], path[i+1])]:
-                                max_edge_load=link_loads[(path[i], path[i+1])]
+                            if max_edge_load < link_flows[(path[i], path[i+1])]:
+                                max_edge_load=link_flows[(path[i], path[i+1])]
                         data_list[2]=max_edge_load
                         data_list[3]=cost_func(data_list[0], max_edge_load)
                 # ======================================
@@ -124,23 +122,23 @@ def Convergent_Distributed_LB(weighted_path_dict, network_instance, EPR, cost_fu
                     if data_list[1] != weighted_path_dict[(s, d)][i][1]:
                         weighted_path_dict[(s, d)][i]=(weighted_path_dict[(s, d)][i][0], data_list[1])
 
-            link_loads, local_link_load=network_instance.distribute_arbitrary_flow_on_weighted_paths_with_EPs_return_dict(
-                                                    weighted_path_dict, EPR, p2p_traffic_matrix)
-            max_link_load=max(link_loads.values())
+            link_flows, local_link_flows=network_instance.distribute_arbitrary_flow_on_weighted_paths_with_EPs_return_dict(
+                                                    weighted_path_dict, EPR, M_EPs)
+            max_link_load=max(link_flows.values())
             for (s, d), data_lists in data.items():
                 for i, data_list in enumerate(data_lists):
                     path=data_list[0]
                     max_edge_load = 0
                     for i in range(len(path)-1):
-                        if max_edge_load < link_loads[(path[i], path[i+1])]:
-                            max_edge_load=link_loads[(path[i], path[i+1])]
+                        if max_edge_load < link_flows[(path[i], path[i+1])]:
+                            max_edge_load=link_flows[(path[i], path[i+1])]
                     data_list[2]=max_edge_load
                     data_list[3]=cost_func(data_list[0], max_edge_load)
             # ======================================
 
-        print(f"at it{it}, sat load={local_link_load/max(link_loads.values())}")
+        print(f"at it{it}, sat load={local_link_flows/max(link_flows.values())}")
         plot_x_data.append(it)
-        plot_y_data.append(local_link_load/max(link_loads.values()))
+        plot_y_data.append(local_link_flows/max(link_flows.values()))
 
         if len(plot_y_data)>10 and max(plot_y_data[-9:])-min(plot_y_data[-9:]) < 0.0001:
             print("seems to converge, terminating")

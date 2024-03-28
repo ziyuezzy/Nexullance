@@ -1,6 +1,8 @@
 import gurobipy as gp
 from gurobipy import GRB
 
+NUM_threads=1
+
 options = {
     "WLSACCESSID": "98bc137f-bbf8-49c8-afec-4011ef50faae",
     "WLSSECRET": "a4c4f9db-3f50-4544-a360-a0e1f17f9130",
@@ -22,7 +24,7 @@ def Solve_load_balancing(path_dict, edge_list, traffic_matrix=[], maximum_prob=1
     assert(num_routers.is_integer() and 'length of path_dict should be N*(N-1), N is the number of routers')
     
     if list(traffic_matrix):
-        assert(len(traffic_matrix)==len(traffic_matrix[0])==num_routers and  'traffic matrix shape is wrong, note that this should be a R2R traffic matrix!')
+        assert(len(traffic_matrix)==len(traffic_matrix[0])==num_routers and  'traffic matrix shape is wrong, note that this should be a M_R traffic matrix!')
     else:
         traffic_matrix=[[1 for j in range(int(num_routers))] for i in range(int(num_routers))]# default traffic pattern is uniform
         for i in range(int(num_routers)): 
@@ -81,14 +83,14 @@ def Solve_load_balancing(path_dict, edge_list, traffic_matrix=[], maximum_prob=1
         # model.setParam(GRB.Param.IntFeasTol, 1e-9)
         # model.setParam(GRB.Param.FeasibilityTol, 1e-9)
         # model.setParam(GRB.Param.IterationLimit, 2)
-        env.setParam('Threads', 1)    #Limit the number of cores used according to the license
+        env.setParam('Threads', NUM_threads)    #Limit the number of cores used according to the license
         model.setParam(GRB.Param.Method, _solver)  
         model.setParam(GRB.Param.Crossover, 0)  
         # Optimize the model
         model.optimize()
         
         all_weighted_paths={}
-        result_link_loads={}
+        result_link_flows={}
         if model.status == GRB.OPTIMAL:
             print("Optimal solution found")
             if _verbose:
@@ -105,11 +107,11 @@ def Solve_load_balancing(path_dict, edge_list, traffic_matrix=[], maximum_prob=1
                         all_weighted_paths[(s, d)].append( (path, 1.0) )
                     unique_path_id+=1
             for (u, v), load in link_load_var.items():
-                result_link_loads[(u,v)]=load.x
+                result_link_flows[(u,v)]=load.x
             Max_load_result=Max_load.x
             print(f'Max link load is: {Max_load.x}')
 
-    return all_weighted_paths, result_link_loads, Max_load_result
+    return all_weighted_paths, result_link_flows, Max_load_result
 
 
 
@@ -128,7 +130,7 @@ def Solve_load_balancing(path_dict, edge_list, traffic_matrix=[], maximum_prob=1
 #     assert(num_routers.is_integer() and 'length of path_dict should be N*(N-1), N is the number of routers')
     
 #     if list(traffic_matrix):
-#         assert(len(traffic_matrix)==len(traffic_matrix[0])==num_routers and  'traffic matrix shape is wrong, note that this should be a R2R traffic matrix!')
+#         assert(len(traffic_matrix)==len(traffic_matrix[0])==num_routers and  'traffic matrix shape is wrong, note that this should be a M_R traffic matrix!')
 #     else:
 #         traffic_matrix=[[1 for j in range(int(num_routers))] for i in range(int(num_routers))]# default traffic pattern is uniform
 #         for i in range(int(num_routers)): 
@@ -187,7 +189,7 @@ def Solve_load_balancing(path_dict, edge_list, traffic_matrix=[], maximum_prob=1
 #         model.optimize()
         
 #         all_weighted_paths={}
-#         result_link_loads={}
+#         result_link_flows={}
 #         # if model.status == GRB.OPTIMAL:
 #         print("Optimal solution found")
 #         unique_path_id=0
@@ -200,8 +202,8 @@ def Solve_load_balancing(path_dict, edge_list, traffic_matrix=[], maximum_prob=1
 #                     all_weighted_paths[(s, d)].append( (path, 1.0) )
 #                 unique_path_id+=1
 #         for (u, v), load in link_load_var.items():
-#             result_link_loads[(u,v)]=load.x
+#             result_link_flows[(u,v)]=load.x
 #         print(f'Max link load is: {Max_load.x}')
 
-#     return all_weighted_paths, result_link_loads
+#     return all_weighted_paths, result_link_flows
     

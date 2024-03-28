@@ -43,7 +43,7 @@ def Generate_load_balancing_problem(path_dict, edge_list, traffic_matrix=None, _
     # Define objective function -- the maximum of all link's load
     # this is dependent on the traffic pattern
 
-    list_of_link_loads=[]
+    list_of_link_flows=[]
     for (u,v) in edge_list:
         #TODO: alternatively, enforce bi-directional paths to be on the same link, see difference
         # one direction
@@ -51,16 +51,16 @@ def Generate_load_balancing_problem(path_dict, edge_list, traffic_matrix=None, _
         for i in range(num_paths):
             if (u,v) in data[i][2]:
                 B[i]=traffic_matrix[u][v]
-        list_of_link_loads.append(B@x)
+        list_of_link_flows.append(B@x)
         # another direction
         B=[0]*num_paths
         for i in range(num_paths):
             if (v,u) in data[i][2]:
                 B[i]=traffic_matrix[v][u]
-        list_of_link_loads.append(B@x)
+        list_of_link_flows.append(B@x)
 
-    list_of_link_loads=cp.hstack(list_of_link_loads)
-    objective = cp.Minimize(cp.max(list_of_link_loads))
+    list_of_link_flows=cp.hstack(list_of_link_flows)
+    objective = cp.Minimize(cp.max(list_of_link_flows))
 
     problem = cp.Problem(objective, constraints)
 
@@ -107,7 +107,7 @@ def Solve_load_balancing(path_dict, edge_list, traffic_matrix=None, _integer=Fal
     # Define objective function -- the maximum of all link's load
     # this is dependent on the traffic pattern
 
-    list_of_link_loads=[]
+    list_of_link_flows=[]
     for (u,v) in edge_list:
         #TODO: alternatively, enforce bi-directional paths to be on the same link, see difference
         # one direction
@@ -115,16 +115,16 @@ def Solve_load_balancing(path_dict, edge_list, traffic_matrix=None, _integer=Fal
         for i in range(num_paths):
             if (u,v) in data[i][2]:
                 B[i]=traffic_matrix[u][v]
-        list_of_link_loads.append(B@x)
+        list_of_link_flows.append(B@x)
         # another direction
         B=[0]*num_paths
         for i in range(num_paths):
             if (v,u) in data[i][2]:
                 B[i]=traffic_matrix[v][u]
-        list_of_link_loads.append(B@x)
+        list_of_link_flows.append(B@x)
 
-    list_of_link_loads=cp.hstack(list_of_link_loads)
-    objective = cp.Minimize(cp.max(list_of_link_loads))
+    list_of_link_flows=cp.hstack(list_of_link_flows)
+    objective = cp.Minimize(cp.max(list_of_link_flows))
 
     problem = cp.Problem(objective, constraints)
 
