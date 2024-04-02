@@ -223,7 +223,7 @@ def calculate_data_paths_within_length(topology_instance, config, max_path_lengt
     print(f"calculation done for {config} with shorter-than-{max_path_length} paths routing")
     return _result, list(topology_instance.nx_graph.edges()), paths_dict
 
-def ECMP(path_dict): 
+def ECMP(path_dict): # input is a dictionary (key=(src, dest))
     # convert a path dict to a weighted path dict using equal-cost multi-path routing (ECMP)
     ECMP_path_dict={}
     for (u,v), paths in path_dict.items():
@@ -231,6 +231,17 @@ def ECMP(path_dict):
         for path in paths:
             ECMP_path_dict[(u,v)].append( (path, 1/len(paths)) ) 
             # TODO: assign the residual weight to the last path, to avoid rounding errors?
+    return ECMP_path_dict
+
+def ECMP_nx(path_dict):  # input is a dictionary (key=src) of dictionary (key=dest), as in the style of networkx
+    # convert a path dict to a weighted path dict using equal-cost multi-path routing (ECMP)
+    ECMP_path_dict={}
+    for u, v_dict in path_dict.items():
+        ECMP_path_dict[u]={}
+        for v, paths in v_dict.items():
+            for path in paths:
+                ECMP_path_dict[u][v].append( (path, 1/len(paths)) ) 
+                # TODO: assign the residual weight to the last path, to avoid rounding errors?
     return ECMP_path_dict
 
 def clean_up_weighted_paths(weighted_path_dict):
@@ -262,7 +273,14 @@ def generate_uniform_traffic_pattern(num_routers, EPs_per_router):
         traffic_matrix[i][i]=0
     return traffic_matrix
 
-def generate_shift_traffic_pattern(num_routers, EPs_per_router):
+def generate_shift_traffic_pattern(num_routers, EPs_per_router, shift):
+    total_num_EP=EPs_per_router*num_routers
+    traffic_matrix=np.zeros((total_num_EP, total_num_EP))
+    for i in range(total_num_EP):
+        traffic_matrix[i][(i+shift)%total_num_EP]=1
+
+    return traffic_matrix
+def generate_half_shift_traffic_pattern(num_routers, EPs_per_router):
     total_num_EP=EPs_per_router*num_routers
     traffic_matrix=np.zeros((total_num_EP, total_num_EP))
     for i in range(total_num_EP):

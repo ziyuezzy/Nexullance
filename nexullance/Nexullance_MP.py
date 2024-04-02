@@ -24,7 +24,8 @@ class Nexullance_MP:
         4: Barrier
         5: Concurrent (uses multiple methods)
         '''    
-        self.nx_graph: Graph = _nx_graph
+        self.nx_graph: Graph = _nx_graph 
+        # although we use un-directed graph here, each link still has two loads on two directions as in line 57,59
         self.M_R: list = _M_R
         self.solver: int = _solver
         self.verbose: bool = _verbose
