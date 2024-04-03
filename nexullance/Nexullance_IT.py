@@ -231,12 +231,13 @@ class Nexullance_IT:
             results_method_1.append(max_link_load)
 
         # repeat optimization_method_2 num_method_2 times, 
-        results_method_2 = {} # key: step parameter, value: maximum link load at each iteration
+        results_method_2 = []
         # each time decreasing the step parameter by a factor of 0.5.
         step = 0.5
+        max_link_loads = [0]
         for i in range(max_num_method_2):
             _continue, max_link_loads = self.optimization_method_2(step, method_2_weights)
-            results_method_2[step] = max_link_loads
+            results_method_2.append(max_link_loads)
             step *= 0.5
             if not _continue:
                 break
