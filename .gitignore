@@ -10,6 +10,7 @@ nexullance/*.ipynb
 nexullance/Cut_Euler_uniform.py
 archive/
 LF_archive/
+nexullance/bin
 
 # white listing
 !nexullance/*.ipynb

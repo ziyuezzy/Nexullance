@@ -1,6 +1,6 @@
 import networkx as nx
 from joblib import Parallel, delayed
-from random import sample
+from random import sample, shuffle
 Graph = nx.graph.Graph
 DiGraph = nx.DiGraph
 
@@ -146,53 +146,53 @@ class Nexullance_IT:
                         continue
                     else:
                         success = True
+                    self.update_paths(old_path_id, old_path, new_path, src, dst, step)
 
-                    old_path_weight = self.routing_table[src][dst][old_path_id]
-                    # first check whether the new path is already in the routing table
-                    new_path_exists = False
-                    new_path_id = None
-                    delta_weight = None
-                    current_path_dict = self.routing_table[src][dst]
-                    for path_id, weight in current_path_dict.items():
-                        if self.path_id_to_path[path_id] == new_path:
-                            new_path_exists = True
-                            new_path_id = path_id
-                            delta_weight = min([step, old_path_weight, 1-weight])
-                            break
-                    if not new_path_exists:
-                        # if the new path is not in the routing table, give it new id and add it to the graph attributes(later)
-                        new_path_id = self.next_path_id
-                        self.next_path_id += 1
-                        self.path_id_to_path[new_path_id] = new_path
-                        delta_weight = min([step, old_path_weight])
-                        self.routing_table[src][dst][new_path_id] = 0.0
-                    # now we update the consequence of decreasing the weight of the old path
-                    # first handle the weigth
-                    self.routing_table[src][dst][old_path_id] -= delta_weight
-                    assert(1.0>= self.routing_table[src][dst][old_path_id] >= 0.0) # TODO: delete this assertion
-                        # if the remaining weight of theold path is very small, delete the old path
-                    if self.routing_table[src][dst][old_path_id] < 0.0001:
-                        del self.routing_table[src][dst][old_path_id]
-                        del self.path_id_to_path[old_path_id]
-                        for i in range(len(old_path)-1):
-                            self.nx_digraph[old_path[i]][old_path[i+1]]['path_ids'].remove(old_path_id)
-                    # then handle the link loads (nx graph and link_loads dictionary)
-                    for i in range(len(old_path)-1):
-                        self.nx_digraph[old_path[i]][old_path[i+1]]['load'] -= delta_weight*self.M_R[src][dst]/self.Cap_remote
-                        self.link_loads[(old_path[i], old_path[i+1])] -= delta_weight*self.M_R[src][dst]/self.Cap_remote
-                        assert(self.link_loads[(old_path[i], old_path[i+1])] == self.nx_digraph[old_path[i]][old_path[i+1]]['load']) # TODO: delete this assertion
-                    # now we update the consequence of increasing the weight of the new path
-                    # first handle the weigth
-                    self.routing_table[src][dst][new_path_id] += delta_weight
-                    # then the link loads
-                    for i in range(len(new_path)-1):
-                        self.nx_digraph[new_path[i]][new_path[i+1]]['load'] += delta_weight*self.M_R[src][dst]/self.Cap_remote
-                        self.link_loads[(new_path[i], new_path[i+1])] += delta_weight*self.M_R[src][dst]/self.Cap_remote
-                        assert(self.link_loads[(new_path[i], new_path[i+1])] == self.nx_digraph[new_path[i]][new_path[i+1]]['load']) # TODO: delete this assertion
-                        if not new_path_exists:
-                            assert(new_path_id not in self.nx_digraph[new_path[i]][new_path[i+1]]['path_ids'])# TODO: delete this assertion
-                            self.nx_digraph[new_path[i]][new_path[i+1]]['path_ids'].append(new_path_id)
-
+                    # old_path_weight = self.routing_table[src][dst][old_path_id]
+                    # # first check whether the new path is already in the routing table
+                    # new_path_exists = False
+                    # new_path_id = None
+                    # delta_weight = None
+                    # current_path_dict = self.routing_table[src][dst]
+                    # for path_id, weight in current_path_dict.items():
+                    #     if self.path_id_to_path[path_id] == new_path:
+                    #         new_path_exists = True
+                    #         new_path_id = path_id
+                    #         delta_weight = min([step, old_path_weight, 1-weight])
+                    #         break
+                    # if not new_path_exists:
+                    #     # if the new path is not in the routing table, give it new id and add it to the graph attributes(later)
+                    #     new_path_id = self.next_path_id
+                    #     self.next_path_id += 1
+                    #     self.path_id_to_path[new_path_id] = new_path
+                    #     delta_weight = min([step, old_path_weight])
+                    #     self.routing_table[src][dst][new_path_id] = 0.0
+                    # # now we update the consequence of decreasing the weight of the old path
+                    # # first handle the weigth
+                    # self.routing_table[src][dst][old_path_id] -= delta_weight
+                    # assert(1.0>= self.routing_table[src][dst][old_path_id] >= 0.0) # TODO: delete this assertion
+                    #     # if the remaining weight of theold path is very small, delete the old path
+                    # if self.routing_table[src][dst][old_path_id] < 0.0001:
+                    #     del self.routing_table[src][dst][old_path_id]
+                    #     del self.path_id_to_path[old_path_id]
+                    #     for i in range(len(old_path)-1):
+                    #         self.nx_digraph[old_path[i]][old_path[i+1]]['path_ids'].remove(old_path_id)
+                    # # then handle the link loads (nx graph and link_loads dictionary)
+                    # for i in range(len(old_path)-1):
+                    #     self.nx_digraph[old_path[i]][old_path[i+1]]['load'] -= delta_weight*self.M_R[src][dst]/self.Cap_remote
+                    #     self.link_loads[(old_path[i], old_path[i+1])] -= delta_weight*self.M_R[src][dst]/self.Cap_remote
+                    #     assert(self.link_loads[(old_path[i], old_path[i+1])] == self.nx_digraph[old_path[i]][old_path[i+1]]['load']) # TODO: delete this assertion
+                    # # now we update the consequence of increasing the weight of the new path
+                    # # first handle the weigth
+                    # self.routing_table[src][dst][new_path_id] += delta_weight
+                    # # then the link loads
+                    # for i in range(len(new_path)-1):
+                    #     self.nx_digraph[new_path[i]][new_path[i+1]]['load'] += delta_weight*self.M_R[src][dst]/self.Cap_remote
+                    #     self.link_loads[(new_path[i], new_path[i+1])] += delta_weight*self.M_R[src][dst]/self.Cap_remote
+                    #     assert(self.link_loads[(new_path[i], new_path[i+1])] == self.nx_digraph[new_path[i]][new_path[i+1]]['load']) # TODO: delete this assertion
+                    #     if not new_path_exists:
+                    #         assert(new_path_id not in self.nx_digraph[new_path[i]][new_path[i+1]]['path_ids'])# TODO: delete this assertion
+                    #         self.nx_digraph[new_path[i]][new_path[i+1]]['path_ids'].append(new_path_id)
                 if success:
                     break
                 else:
@@ -210,13 +210,127 @@ class Nexullance_IT:
         # return True, meaning that decreasing the step parameter might make further progress
 
 
-                    
+                   
+    def optimization_method_2_alt(self, step: float, _weights: callable = weight_function, 
+                threshold: float = 0.1, randomize: bool = False, 
+                algorithm: str = "dijkstra") -> 'tuple[bool, list]':
+        # the first returned boolean indciates whether further decreasing the step size is possible for further progress
+        # the second returned list contains the maximum link after each successful iteration
+        # TODO: randomize?
+        # optimization_method_2 is more fine-grained than optimization_method_1,
+        # it finds the maximum loaded link, and then find alternative routes for a path that passes by
+        # the new path is found by a weighted (bidirectional) dijkstra / bellman-ford algorithm.
+        # the 'step' parameter is the maximum path weight transfer in one iteration
+        # the 'threshold' parameter determines when the iteration stops, but at least 10 iterations.
+        max_link_loads = [max(self.link_loads.values())]
+        while True:
+            if ((len(max_link_loads) > 10 and ((min(max_link_loads[-10:-1]) - max_link_loads[-1]) < threshold ))):
+                break
+
+            # u, v = max(self.link_loads, key=lambda k: self.link_loads[k])
+            max_keys = [key for key, value in self.link_loads.items() if value == max_link_loads[-1]]
+
+            success: bool = False # successful for not in making possible progress
+            for u, v in max_keys:
+                # select a path whose contribution to the load of the link is the largest
+                # this path's weight will be decreased later      
+                current_path_ids: list = self.nx_digraph[u][v]['path_ids']
+                path_contributions = {} # to be sorted
+                for path_id in current_path_ids:
+                    current_path = self.path_id_to_path[path_id]
+                    src = current_path[0]
+                    dst = current_path[-1]
+                    contribution = self.routing_table[src][dst][path_id]*self.M_R[src][dst]
+                    path_contributions[path_id] = contribution
+
+                # sort the contributions in descending order
+                sorted_keys = sorted(path_contributions, key=lambda k: path_contributions[k], reverse=True)
+                for old_path_id in sorted_keys:
+                    old_path = self.path_id_to_path[old_path_id]
+                    src = old_path[0]
+                    dst = old_path[-1]
+                    new_paths = self.least_weighted_paths_for_pair(self.nx_digraph, src, dst, _weights, algorithm)
+                    if randomize:
+                        shuffle(new_paths)
+                    for new_path in new_paths:
+                        if new_path == old_path:
+                            continue
+                        else:
+                            success = True
+                            self.update_paths(old_path_id, old_path, new_path, src, dst, step)
+                            break
+
+                    if success:
+                        break
+                    else:
+                        continue
+
+                if success:
+                    break
+                else:
+                    continue
+            if success:
+                # update the maximum link load
+                max_link_load = max(self.link_loads.values())
+                max_link_loads.append(max_link_load)
+                continue # go to the next iteration
+            else:
+                print("No possible progress, terminating.")
+                return (False, max_link_loads) 
+                # return False, meaning that even decreasing the step parameter should not make any progress
+        return (True, max_link_loads)                
+        # return True, meaning that decreasing the step parameter might make further progress
+
+    def update_paths(self, old_path_id:int, old_path:list, new_path:list, src:int, dst:int, step:float):
+        old_path_weight = self.routing_table[src][dst][old_path_id]
+        # first check whether the new path is already in the routing table
+        new_path_exists = False
+        new_path_id = None
+        delta_weight = None
+        current_path_dict = self.routing_table[src][dst]
+        for path_id, weight in current_path_dict.items():
+            if self.path_id_to_path[path_id] == new_path:
+                new_path_exists = True
+                new_path_id = path_id
+                delta_weight = min([step, old_path_weight, 1-weight])
+                break
+        if not new_path_exists:
+            # if the new path is not in the routing table, give it new id and add it to the graph attributes(later)
+            new_path_id = self.next_path_id
+            self.next_path_id += 1
+            self.path_id_to_path[new_path_id] = new_path
+            delta_weight = min([step, old_path_weight])
+            self.routing_table[src][dst][new_path_id] = 0.0
+        # now we update the consequence of decreasing the weight of the old path
+        # first handle the weigth
+        self.routing_table[src][dst][old_path_id] -= delta_weight
+        assert(1.0>= self.routing_table[src][dst][old_path_id] >= 0.0) # TODO: delete this assertion
+            # if the remaining weight of theold path is very small, delete the old path
+        if self.routing_table[src][dst][old_path_id] < 0.0001:
+            del self.routing_table[src][dst][old_path_id]
+            del self.path_id_to_path[old_path_id]
+            for i in range(len(old_path)-1):
+                self.nx_digraph[old_path[i]][old_path[i+1]]['path_ids'].remove(old_path_id)
+        # then handle the link loads (nx graph and link_loads dictionary)
+        for i in range(len(old_path)-1):
+            self.nx_digraph[old_path[i]][old_path[i+1]]['load'] -= delta_weight*self.M_R[src][dst]/self.Cap_remote
+            self.link_loads[(old_path[i], old_path[i+1])] -= delta_weight*self.M_R[src][dst]/self.Cap_remote
+            assert(self.link_loads[(old_path[i], old_path[i+1])] == self.nx_digraph[old_path[i]][old_path[i+1]]['load']) # TODO: delete this assertion
+        # now we update the consequence of increasing the weight of the new path
+        # first handle the weigth
+        self.routing_table[src][dst][new_path_id] += delta_weight
+        # then the link loads
+        for i in range(len(new_path)-1):
+            self.nx_digraph[new_path[i]][new_path[i+1]]['load'] += delta_weight*self.M_R[src][dst]/self.Cap_remote
+            self.link_loads[(new_path[i], new_path[i+1])] += delta_weight*self.M_R[src][dst]/self.Cap_remote
+            assert(self.link_loads[(new_path[i], new_path[i+1])] == self.nx_digraph[new_path[i]][new_path[i+1]]['load']) # TODO: delete this assertion
+            if not new_path_exists:
+                assert(new_path_id not in self.nx_digraph[new_path[i]][new_path[i+1]]['path_ids'])# TODO: delete this assertion
+                self.nx_digraph[new_path[i]][new_path[i+1]]['path_ids'].append(new_path_id)
 
     def optimize(self, num_method_1: int, max_num_method_2: int, 
         method_1_weights: callable = weight_function, method_2_weights: callable = weight_function):
-
         self.initialize()
-
         # execute optimization_method_1 without weights
         # equivalently, the routing table is initialized with ECMP-ASP
 
@@ -242,9 +356,40 @@ class Nexullance_IT:
             if not _continue:
                 break
         self.result_max_link_load = max_link_loads[-1]
-            
         return results_method_1, results_method_2
     
+    def optimize_alt(self, num_method_1: int, max_num_method_2: int, 
+        method_1_weights: callable = weight_function, method_2_weights: callable = weight_function):
+        self.initialize()
+        # execute optimization_method_1 without weights
+        # equivalently, the routing table is initialized with ECMP-ASP
+
+        assert(num_method_1 >= 1 and "num_method_1 should be a positive integer greater than 1.")
+        # repeat optimization_method_1 num_method_1 times
+        results_method_1 = []
+        init_for_method2 = False
+        for i in range(num_method_1):
+            if i == num_method_1-1:
+                init_for_method2 = True
+            max_link_load = self.optimization_method_1(init_for_method2, method_1_weights)
+            results_method_1.append(max_link_load)
+
+        # repeat optimization_method_2 num_method_2 times, 
+        results_method_2 = []
+        # each time decreasing the step parameter by a factor of 0.5.
+        step = 0.5
+        max_link_loads = [0]
+        for i in range(max_num_method_2):
+            _continue, max_link_loads = self.optimization_method_2_alt(step, method_2_weights, randomize=True)
+            results_method_2.append(max_link_loads)
+            step *= 0.5
+            if not _continue:
+                break
+        self.result_max_link_load = max_link_loads[-1]
+        return results_method_1, results_method_2
+    
+
+
     def print_results(self):
         pass
 
@@ -301,4 +446,14 @@ class Nexullance_IT:
         else:
             raise ValueError("Invalid algorithm choice.")
 
-
+    def least_weighted_paths_for_pair(self,_G: Graph, _s: int, _d: int, _weights: callable, algorithm: str) -> dict:
+        # the following algorithms return all least-weighted paths between two nodes.
+        if algorithm == "dijkstra" or algorithm == "bellman-ford": 
+            _result = list(nx.all_shortest_paths(_G, _s, _d, _weights, algorithm))
+            if not _result:
+                raise ValueError(f"Error, no path found between vertex {_s} and vertex {_d}")
+            
+            return _result
+                
+        else:
+            raise ValueError("Invalid algorithm choice.")
