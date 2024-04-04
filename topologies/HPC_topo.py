@@ -5,7 +5,7 @@ from concurrent.futures import ThreadPoolExecutor
 from joblib import Parallel, delayed
 MAX_KERNELS = 1 # define maximum threads to run
 import numpy as np
-import _random
+import random
 from globals import convert_M_EPs_to_M_R, local_link_flows_from_M_EPs
 
 #TODO: check "bfs", "all_pairs_shortest_path" and "Floyd–Warshall algorithm", for speeding up the methods

@@ -280,11 +280,21 @@ def generate_shift_traffic_pattern(num_routers, EPs_per_router, shift):
         traffic_matrix[i][(i+shift)%total_num_EP]=1
 
     return traffic_matrix
+
 def generate_half_shift_traffic_pattern(num_routers, EPs_per_router):
     total_num_EP=EPs_per_router*num_routers
     traffic_matrix=np.zeros((total_num_EP, total_num_EP))
     for i in range(total_num_EP):
         traffic_matrix[i][(i+total_num_EP//2)%total_num_EP]=1
+
+    return traffic_matrix
+
+def generate_diagonal_traffic_pattern(num_routers, EPs_per_router, offset):
+    total_num_EP=EPs_per_router*num_routers
+    traffic_matrix=np.zeros((total_num_EP, total_num_EP))
+    for i in range(total_num_EP):
+        traffic_matrix[i][(i+offset)%total_num_EP]=1
+        traffic_matrix[i][(i-offset)%total_num_EP]=1
 
     return traffic_matrix
 
