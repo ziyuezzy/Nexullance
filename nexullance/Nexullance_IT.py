@@ -5,6 +5,7 @@ Graph = nx.graph.Graph
 DiGraph = nx.DiGraph
 import time
 import tracemalloc
+import numpy as np
 
 def weight_function( s: int, d: int, edge_attributes: dict):
     # define the weight function for the dijkstra or the bellman-ford algorithm.
@@ -110,7 +111,7 @@ class Nexullance_IT:
         return max_link_load
 
     def optimization_method_2(self, step: float, _weights: callable = weight_function, 
-                threshold: float = 0.01, randomize: bool = True, 
+                threshold: float = 0.001, randomize: bool = True, 
                 algorithm: str = "dijkstra", max_attempts: int = 1000) -> 'tuple[bool, list]':
         # the first returned boolean indciates whether further decreasing the step size is possible for further progress
         # the second returned list contains the maximum link after each successful iteration
@@ -123,7 +124,7 @@ class Nexullance_IT:
         max_link_loads = [max(self.link_loads.values())]
         attempts:int = 0
         while True:
-            if (attempts>max_attempts or (len(max_link_loads) > 10 and ((min(max_link_loads[-10:-1]) - max_link_loads[-1]) < threshold ))):
+            if (attempts>max_attempts or (len(max_link_loads) > 10 and ((np.average(max_link_loads[-10:-1]) - max_link_loads[-1]) < threshold ))):
                 break
 
             # u, v = max(self.link_loads, key=lambda k: self.link_loads[k])
@@ -174,75 +175,79 @@ class Nexullance_IT:
 
 
                    
-    # def optimization_method_2_alt(self, step: float, _weights: callable = weight_function, 
-    #             threshold: float = 0.1, randomize: bool = False, 
-    #             algorithm: str = "dijkstra") -> 'tuple[bool, list]':
-    #     # the first returned boolean indciates whether further decreasing the step size is possible for further progress
-    #     # the second returned list contains the maximum link after each successful iteration
-    #     # TODO: randomize?
-    #     # optimization_method_2 is more fine-grained than optimization_method_1,
-    #     # it finds the maximum loaded link, and then find alternative routes for a path that passes by
-    #     # the new path is found by a weighted (bidirectional) dijkstra / bellman-ford algorithm.
-    #     # the 'step' parameter is the maximum path weight transfer in one iteration
-    #     # the 'threshold' parameter determines when the iteration stops, but at least 10 iterations.
-    #     max_link_loads = [max(self.link_loads.values())]
-    #     while True:
-    #         if ((len(max_link_loads) > 10 and ((min(max_link_loads[-10:-1]) - max_link_loads[-1]) < threshold ))):
-    #             break
+    def optimization_method_2_alt(self, step: float, _weights: callable = weight_function, 
+                threshold: float = 0.01, randomize: bool = False, 
+                algorithm: str = "dijkstra", max_attempts: int = 1000) -> 'tuple[bool, list]':
+        # the first returned boolean indciates whether further decreasing the step size is possible for further progress
+        # the second returned list contains the maximum link after each successful iteration
+        # TODO: randomize?
+        # optimization_method_2 is more fine-grained than optimization_method_1,
+        # it finds the maximum loaded link, and then find alternative routes for a path that passes by
+        # the new path is found by a weighted (bidirectional) dijkstra / bellman-ford algorithm.
+        # the 'step' parameter is the maximum path weight transfer in one iteration
+        # the 'threshold' parameter determines when the iteration stops, but at least 10 iterations.
+        max_link_loads = [max(self.link_loads.values())]
+        attempts:int = 0
+        while True:
+            if (attempts>max_attempts or (len(max_link_loads) > 100 and ((np.average(max_link_loads[-50:-1]) - max_link_loads[-1]) < threshold ))):
+                break
 
-    #         # u, v = max(self.link_loads, key=lambda k: self.link_loads[k])
-    #         max_keys = [key for key, value in self.link_loads.items() if value == max_link_loads[-1]]
+            # u, v = max(self.link_loads, key=lambda k: self.link_loads[k])
+            max_keys = [key for key, value in self.link_loads.items() if value == max_link_loads[-1]]
 
-    #         success: bool = False # successful for not in making possible progress
-    #         for u, v in max_keys:
-    #             # select a path whose contribution to the load of the link is the largest
-    #             # this path's weight will be decreased later      
-    #             current_path_ids: list = self.nx_digraph[u][v]['path_ids']
-    #             path_contributions = {} # to be sorted
-    #             for path_id in current_path_ids:
-    #                 current_path = self.path_id_to_path[path_id]
-    #                 src = current_path[0]
-    #                 dst = current_path[-1]
-    #                 contribution = self.routing_table[src][dst][path_id]*self.M_R[src][dst]
-    #                 path_contributions[path_id] = contribution
+            success: bool = False # successful for not in making possible progress
+            for u, v in max_keys:
+                # select a path whose contribution to the load of the link is the largest
+                # this path's weight will be decreased later      
+                current_path_ids: list = self.nx_digraph[u][v]['path_ids']
+                path_contributions = {} # to be sorted
+                for path_id in current_path_ids:
+                    current_path = self.path_id_to_path[path_id]
+                    src = current_path[0]
+                    dst = current_path[-1]
+                    contribution = self.routing_table[src][dst][path_id]*self.M_R[src][dst]
+                    path_contributions[path_id] = contribution
 
-    #             # sort the contributions in descending order
-    #             sorted_keys = sorted(path_contributions, key=lambda k: path_contributions[k], reverse=True)
-    #             for old_path_id in sorted_keys:
-    #                 old_path = self.path_id_to_path[old_path_id]
-    #                 src = old_path[0]
-    #                 dst = old_path[-1]
-    #                 new_paths = self.least_weighted_paths_for_pair(self.nx_digraph, src, dst, _weights, algorithm)
-    #                 if randomize:
-    #                     shuffle(new_paths)
-    #                 for new_path in new_paths:
-    #                     if new_path == old_path:
-    #                         continue
-    #                     else:
-    #                         success = True
-    #                         self.update_paths(old_path_id, old_path, new_path, src, dst, step)
-    #                         break
+                # sort the contributions in descending order
+                sorted_keys = sorted(path_contributions, key=lambda k: path_contributions[k], reverse=True)
+                for old_path_id in sorted_keys:
+                    old_path = self.path_id_to_path[old_path_id]
+                    src = old_path[0]
+                    dst = old_path[-1]
+                    new_paths = self.least_weighted_paths_for_pair(self.nx_digraph, src, dst, _weights, algorithm)
+                    if randomize:
+                        shuffle(new_paths)
+                    for new_path in new_paths:
+                        if new_path == old_path:
+                            continue
+                        else:
+                            success = True
+                            self.update_paths(old_path_id, old_path, new_path, src, dst, step)
+                            break
 
-    #                 if success:
-    #                     break
-    #                 else:
-    #                     continue
+                    if success:
+                        break
+                    else:
+                        continue
 
-    #             if success:
-    #                 break
-    #             else:
-    #                 continue
-    #         if success:
-    #             # update the maximum link load
-    #             max_link_load = max(self.link_loads.values())
-    #             max_link_loads.append(max_link_load)
-    #             continue # go to the next iteration
-    #         else:
-    #             print("No possible progress, terminating.")
-    #             return (False, max_link_loads) 
-    #             # return False, meaning that even decreasing the step parameter should not make any progress
-    #     return (True, max_link_loads)                
-    #     # return True, meaning that decreasing the step parameter might make further progress
+                if success:
+                    break
+                else:
+                    continue
+            if success:
+                # update the maximum link load
+                max_link_load = max(self.link_loads.values())
+                max_link_loads.append(max_link_load)
+                attempts+=1
+                self.method_2_attempts+=1
+                continue # go to the next iteration
+            else:
+                print("No possible progress, terminating.")
+                return (False, max_link_loads) 
+                # return False, meaning that even decreasing the step parameter should not make any progress
+        print(f"done with step = {step} for {attempts} attempts.")
+        return (True, max_link_loads)                
+        # return True, meaning that decreasing the step parameter might make further progress
 
     def update_paths(self, old_path_id:int, old_path:list, new_path:list, src:int, dst:int, step:float):
         old_path_weight = self.routing_table[src][dst][old_path_id]
@@ -292,7 +297,7 @@ class Nexullance_IT:
                 self.nx_digraph[new_path[i]][new_path[i+1]]['path_ids'].append(new_path_id)
 
     def optimize(self, num_method_1: int, max_num_method_2: int, 
-        method_1_weights: callable = weight_function, method_2_weights: callable = weight_function):
+        method_1_weights: callable = weight_function, method_2_weights: callable = weight_function, alt: bool = False):
         self.initialize()
         # execute optimization_method_1 without weights
         # equivalently, the routing table is initialized with ECMP-ASP
@@ -313,7 +318,10 @@ class Nexullance_IT:
         step = 0.5
         max_link_loads = [0]
         for i in range(max_num_method_2):
-            _continue, max_link_loads = self.optimization_method_2(step, method_2_weights)
+            if alt:
+                _continue, max_link_loads = self.optimization_method_2_alt(step, method_2_weights, randomize=True)
+            else:
+                _continue, max_link_loads = self.optimization_method_2(step, method_2_weights)
             results_method_2.append(max_link_loads)
             step *= 0.5
             if not _continue:
@@ -322,7 +330,7 @@ class Nexullance_IT:
         return results_method_1, results_method_2
     
     def optimize_and_profile(self, num_method_1: int, max_num_method_2: int, 
-        method_1_weights: callable = weight_function, method_2_weights: callable = weight_function):
+        method_1_weights: callable = weight_function, method_2_weights: callable = weight_function, alt: bool = False):
         self.initialize()
         # execute optimization_method_1 without weights
         # equivalently, the routing table is initialized with ECMP-ASP
@@ -363,7 +371,10 @@ class Nexullance_IT:
         tracemalloc.start()
 
         for i in range(max_num_method_2):
-            _continue, max_link_loads = self.optimization_method_2(step, method_2_weights)
+            if alt:
+                _continue, max_link_loads = self.optimization_method_2_alt(step, method_2_weights)
+            else:
+                _continue, max_link_loads = self.optimization_method_2(step, method_2_weights)
             # results_method_2.append(max_link_loads)
             step *= 0.5
             if not _continue:
@@ -377,37 +388,6 @@ class Nexullance_IT:
         self.result_max_link_load = max_link_loads[-1]
 
         return times_method_1, peakRAMs_method_1, time_method_2, peakRAM_method_2, results_method_1
-    
-    # def optimize_alt(self, num_method_1: int, max_num_method_2: int, 
-    #     method_1_weights: callable = weight_function, method_2_weights: callable = weight_function):
-    #     self.initialize()
-    #     # execute optimization_method_1 without weights
-    #     # equivalently, the routing table is initialized with ECMP-ASP
-
-    #     assert(num_method_1 >= 1 and "num_method_1 should be a positive integer greater than 1.")
-    #     # repeat optimization_method_1 num_method_1 times
-    #     results_method_1 = []
-    #     init_for_method2 = False
-    #     for i in range(num_method_1):
-    #         if i == num_method_1-1:
-    #             init_for_method2 = True
-    #         max_link_load = self.optimization_method_1(init_for_method2, method_1_weights)
-    #         results_method_1.append(max_link_load)
-
-    #     # repeat optimization_method_2 num_method_2 times, 
-    #     results_method_2 = []
-    #     # each time decreasing the step parameter by a factor of 0.5.
-    #     step = 0.5
-    #     max_link_loads = [0]
-    #     for i in range(max_num_method_2):
-    #         _continue, max_link_loads = self.optimization_method_2_alt(step, method_2_weights, randomize=True)
-    #         results_method_2.append(max_link_loads)
-    #         step *= 0.5
-    #         if not _continue:
-    #             break
-    #     self.result_max_link_load = max_link_loads[-1]
-    #     return results_method_1, results_method_2
-    
 
     def get_result_max_link_load(self):
         return self.result_max_link_load
