@@ -176,7 +176,7 @@ class Nexullance_IT:
 
                    
     def optimization_method_2_alt(self, step: float, _weights: callable = weight_function, 
-                threshold: float = 0.01, randomize: bool = False, 
+                threshold: float = 0.01, randomize: bool = True, 
                 algorithm: str = "dijkstra", max_attempts: int = 1000) -> 'tuple[bool, list]':
         # the first returned boolean indciates whether further decreasing the step size is possible for further progress
         # the second returned list contains the maximum link after each successful iteration
@@ -245,7 +245,7 @@ class Nexullance_IT:
                 print("No possible progress, terminating.")
                 return (False, max_link_loads) 
                 # return False, meaning that even decreasing the step parameter should not make any progress
-        print(f"done with step = {step} for {attempts} attempts.")
+        # print(f"done with step = {step} for {attempts} attempts.")
         return (True, max_link_loads)                
         # return True, meaning that decreasing the step parameter might make further progress
 
@@ -319,7 +319,7 @@ class Nexullance_IT:
         max_link_loads = [0]
         for i in range(max_num_method_2):
             if alt:
-                _continue, max_link_loads = self.optimization_method_2_alt(step, method_2_weights, randomize=True)
+                _continue, max_link_loads = self.optimization_method_2_alt(step, method_2_weights)
             else:
                 _continue, max_link_loads = self.optimization_method_2(step, method_2_weights)
             results_method_2.append(max_link_loads)

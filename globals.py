@@ -293,8 +293,10 @@ def generate_diagonal_traffic_pattern(num_routers, EPs_per_router, offset):
     total_num_EP=EPs_per_router*num_routers
     traffic_matrix=np.zeros((total_num_EP, total_num_EP))
     for i in range(total_num_EP):
-        traffic_matrix[i][(i+offset)%total_num_EP]=1
-        traffic_matrix[i][(i-offset)%total_num_EP]=1
+        dst = i+offset
+        if dst < total_num_EP:
+            traffic_matrix[i][dst]=1
+            traffic_matrix[dst][i]=1
 
     return traffic_matrix
 

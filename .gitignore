@@ -13,6 +13,7 @@ LF_archive/
 nexullance/bin
 nexullance/profiling/**.csv
 nexullance/profiling/**.pkl
+# *.csv
 
 
 # white listing
