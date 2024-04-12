@@ -11,8 +11,8 @@ graph_data_path = os.environ.get('PICKLED_DATA')
 # HPC_topo.get_child_classes()
 
 # create an instance of network topology
-topo_name="DDFtopo"
-topo_config=(6, 2)
+topo_name="RRGtopo"
+topo_config=(4, 3)
 topo_instance=HPC_topo.initialize_child_instance(topo_name, topo_config[0], topo_config[1])
 edge_list=list(topo_instance.nx_graph.edges())
 edgelist_file=graph_data_path+f"/from_graph_edgelists/({topo_config[0]},{topo_config[1]}){topo_name}_edgelist.pickle"
