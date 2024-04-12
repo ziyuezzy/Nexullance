@@ -1,4 +1,4 @@
-from . import HPC_topo
+from .HPC_topo import HPC_topo
 import networkx as nx
 from statistics import mean
 import galois
@@ -68,7 +68,7 @@ def create_routes(q, Fq, X1, X2):
 #========================================== end ============================================
 
 # define the slimfly class
-class Slimflytopo(HPC_topo.HPC_topo):
+class Slimflytopo(HPC_topo):
     # def __init__(self, num_vertices):
     #     super(Slimflytopo, self).__init__()
     #     self.generate_slimfly_topo(num_vertices)
