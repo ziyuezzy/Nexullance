@@ -68,7 +68,7 @@ def plot_bench_bars(_data: dict, methods_name: list, title: str, x_label: str, y
 
 
 
-def plot_scaling_lines(_V: list, _data: dict, title: str, x_label: str, y_label: str, y_log: bool = False, _power_x: int = 1, y_max: int = 0):
+def plot_scaling_lines(_V: list, _data: dict, title: str, x_label: str, y_label: str, y_log: bool = False, _power_x: int = 1, y_max: int = 0, legends: list = None):
     # example input: ==============
     # # _V: list of x-axis data points
     # x axis values should be _V^_power_x
@@ -99,7 +99,7 @@ def plot_scaling_lines(_V: list, _data: dict, title: str, x_label: str, y_label:
         elif len(metrics) > len (x_values):
             raise ValueError("The length of metrics should be less than or equal to the length of x_values")
 
-        plt.plot(x_values, metrics, marker='o', linestyle='-', color=colors[i], label=method)
+        plt.plot(x_values, metrics, marker='o', linestyle='-', color=colors[i], label=legends[i])
 
     # Adding labels and title
     plt.xlabel(x_label)

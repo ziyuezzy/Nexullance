@@ -115,7 +115,6 @@ class Nexullance_IT:
                 algorithm: str = "dijkstra", max_attempts: int = 1000) -> 'tuple[bool, list]':
         # the first returned boolean indciates whether further decreasing the step size is possible for further progress
         # the second returned list contains the maximum link after each successful iteration
-        # TODO: randomize?
         # optimization_method_2 is more fine-grained than optimization_method_1,
         # it finds the maximum loaded link, and then find alternative routes for a path that passes by
         # the new path is found by a weighted (bidirectional) dijkstra / bellman-ford algorithm.
@@ -180,7 +179,6 @@ class Nexullance_IT:
                 algorithm: str = "dijkstra", max_attempts: int = 1000) -> 'tuple[bool, list]':
         # the first returned boolean indciates whether further decreasing the step size is possible for further progress
         # the second returned list contains the maximum link after each successful iteration
-        # TODO: randomize?
         # optimization_method_2 is more fine-grained than optimization_method_1,
         # it finds the maximum loaded link, and then find alternative routes for a path that passes by
         # the new path is found by a weighted (bidirectional) dijkstra / bellman-ford algorithm.
