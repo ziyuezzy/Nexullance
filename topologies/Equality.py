@@ -1,5 +1,5 @@
 import networkx as nx
-from . import HPC_topo
+from .HPC_topo import HPC_topo
 from statistics import mean
 
 # Notations for Equality network:
@@ -7,7 +7,7 @@ from statistics import mean
 # ahops: a list of odd numbers, each number contribute to one link connected to each router
 # bhops: a list of even numbers, each number contribute to two link connected to each router
 # Therefore, this should hold: k = len(ahops)+2*len(bhops)
-class Equalitytopo(HPC_topo.HPC_topo):
+class Equalitytopo(HPC_topo):
     # def __init__(self, n, k, ahops, bhops):
     #     super(Equalitytopo, self).__init__()
     #     self.generate_Equality_topo(n, k, ahops, bhops)
