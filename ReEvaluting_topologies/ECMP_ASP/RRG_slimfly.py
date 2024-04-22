@@ -32,7 +32,7 @@ def main():
             M_EPs = gl.generate_uniform_traffic_pattern(V, EPR)
 
             _network = RRGtopo(V, D)
-            ASP = _network.calculate_all_shortest_paths()
+            ASP, _ = _network.calculate_all_shortest_paths()
             ECMP_ASP = gl.ECMP(ASP)
 
             remote_link_flows, local_link_flows = _network.distribute_M_EPs_on_weighted_paths(ECMP_ASP, EPR, M_EPs)

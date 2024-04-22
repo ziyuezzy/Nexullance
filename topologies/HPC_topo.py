@@ -121,6 +121,18 @@ class HPC_topo():
     def calculate_all_shortest_paths(self): 
         vertices = self.nx_graph.nodes()
         vertex_pairs = [(v1, v2) for v1 in vertices for v2 in vertices if v1 != v2]
+
+        nx_paths_dict = dict(nx.all_pairs_all_shortest_paths(self.nx_graph))
+
+        paths_dict = {}
+        for (v1, v2) in vertex_pairs:
+            paths_dict[(v1, v2)] = nx_paths_dict[v1][v2]
+
+        return paths_dict, "ASP"
+    
+    def calculate_all_shortest_paths_old(self): 
+        vertices = self.nx_graph.nodes()
+        vertex_pairs = [(v1, v2) for v1 in vertices for v2 in vertices if v1 != v2]
         def calculate_shortest_paths(v1, v2):
             return list(nx.all_shortest_paths(self.nx_graph, v1, v2))
         

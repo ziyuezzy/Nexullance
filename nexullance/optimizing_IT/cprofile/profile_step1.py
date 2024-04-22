@@ -20,7 +20,7 @@ def main():
     Cap_local = 10 #GBps
     M_EPs = gl.generate_uniform_traffic_pattern(config[0], EPR)
     # apply simple ECMP:
-    ASP = _network.calculate_all_shortest_paths()
+    ASP, _ = _network.calculate_all_shortest_paths()
     ECMP = gl.ECMP(ASP)
     remote_link_flows, local_link_flows = _network.distribute_M_EPs_on_weighted_paths(ECMP, EPR, M_EPs)
     max_remote_link_load = np.max(remote_link_flows)/Cap_remote

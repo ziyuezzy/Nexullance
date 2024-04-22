@@ -450,35 +450,35 @@ def network_total_throughput(M_EPs, max_remote_link_load, max_local_link_load):
 
 
 
-# automorphism methods using nauty:
-import pynauty as nauty
+# # automorphism methods using nauty:
+# import pynauty as nauty
 
-def generate_nauty_graph_from_nx(nx_graph):
-    adj_dict={n: list(nbrdict.keys()) for n, nbrdict in nx_graph.adjacency()}
-    nauty_graph=nauty.Graph(nx_graph.number_of_nodes(), directed=False, adjacency_dict=adj_dict)
-    return nauty_graph
+# def generate_nauty_graph_from_nx(nx_graph):
+#     adj_dict={n: list(nbrdict.keys()) for n, nbrdict in nx_graph.adjacency()}
+#     nauty_graph=nauty.Graph(nx_graph.number_of_nodes(), directed=False, adjacency_dict=adj_dict)
+#     return nauty_graph
 
-def nauty_autgrp_verbose(nauty_graph, _verbose=True):
-    # Compute the automorphism group
-    aut_group = nauty.autgrp(nauty_graph)
+# def nauty_autgrp_verbose(nauty_graph, _verbose=True):
+#     # Compute the automorphism group
+#     aut_group = nauty.autgrp(nauty_graph)
 
-    # Extract elements from the output tuple
-    generators, grpsize1, grpsize2, orbits, numorbits = aut_group
+#     # Extract elements from the output tuple
+#     generators, grpsize1, grpsize2, orbits, numorbits = aut_group
 
-    if _verbose:
-        # Print the generators of the automorphism group
-        print("Generators of the automorphism group:")
-        print(generators)
+#     if _verbose:
+#         # Print the generators of the automorphism group
+#         print("Generators of the automorphism group:")
+#         print(generators)
 
-        print("Size of the generator set:", len(generators))
+#         print("Size of the generator set:", len(generators))
 
-        # print the size (order) of the group
-        print("Size (order) of the automorphism group:", grpsize1*10**grpsize2)
+#         # print the size (order) of the group
+#         print("Size (order) of the automorphism group:", grpsize1*10**grpsize2)
 
-        # Print the orbits of the vertices
-        print("Orbits of the vertices:", orbits)
+#         # Print the orbits of the vertices
+#         print("Orbits of the vertices:", orbits)
 
-        # Print the number of orbits
-        print("Number of orbits:", numorbits)
+#         # Print the number of orbits
+#         print("Number of orbits:", numorbits)
 
-    return generators
+#     return generators

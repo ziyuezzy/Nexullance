@@ -65,7 +65,7 @@ class Nexullance_IT:
      
     def optimization_method_1(self, init_for_method2: bool, _weights: callable = weight_function):
         # weighted dijkstra algorithm to find the least-weighted paths (for ties, apply ECMP) for all s-d pairs.
-        path_dict = self.least_weighted_paths_for_all_s_d(self.nx_digraph, _weights, "dijkstra", 1)
+        path_dict = self.least_weighted_paths_for_all_s_d(self.nx_digraph, _weights, "dijkstra")
         max_link_load = 0.0
         # clear edge attributes
         for (n1, n2, d) in self.nx_digraph.edges(data=True):
@@ -175,8 +175,8 @@ class Nexullance_IT:
 
                    
     def optimization_method_2_alt(self, step: float, _weights: callable = weight_function, 
-                threshold: float = 0.01, randomize: bool = True, 
-                algorithm: str = "dijkstra", max_attempts: int = 1000) -> 'tuple[bool, list]':
+                threshold: float = 0.001, randomize: bool = True, 
+                algorithm: str = "dijkstra", max_attempts: int = 10000, min_attempts: int = 50) -> 'tuple[bool, list]':
         # the first returned boolean indciates whether further decreasing the step size is possible for further progress
         # the second returned list contains the maximum link after each successful iteration
         # optimization_method_2 is more fine-grained than optimization_method_1,
@@ -187,7 +187,7 @@ class Nexullance_IT:
         max_link_loads = [max(self.link_loads.values())]
         attempts:int = 0
         while True:
-            if (attempts>max_attempts or (len(max_link_loads) > 100 and ((np.average(max_link_loads[-50:-1]) - max_link_loads[-1]) < threshold ))):
+            if (attempts>max_attempts or (len(max_link_loads) > min_attempts+1 and ((np.average(max_link_loads[-min_attempts//2:-1]) - max_link_loads[-1]) < threshold ))):
                 break
 
             # u, v = max(self.link_loads, key=lambda k: self.link_loads[k])
@@ -394,39 +394,12 @@ class Nexullance_IT:
         return self.method_2_attempts
 
     # a weighted dijkstra algorithm to find the least-weighted path for all s-d pairs.
-    def least_weighted_paths_for_all_s_d(self, _G: Graph, _weights: callable, algorithm: str, MAX_KERNELS: int) -> dict:
+    def least_weighted_paths_for_all_s_d(self, _G: Graph, _weights: callable, algorithm: str) -> dict:
         if algorithm == "dijkstra" or algorithm == "bellman-ford": 
-            # only two options to pass to netowrkx
-            paths_dict = {}
-            for u in _G.nodes():
-                paths_dict[u] = {}
-
-            def calculate_shortest_paths(v1, v2):
-                return list(nx.all_shortest_paths(_G, v1, v2, _weights, algorithm))
-                
-            if MAX_KERNELS == 1:
-                # do not parallelize
-                for (v1, v2) in self.vertex_pairs:
-                    all_paths = calculate_shortest_paths(v1, v2)
-                    if not all_paths:
-                        raise ValueError(f"Error, no path found between vertex {v1} and vertex {v2}")
-                    paths_dict[v1][v2] = all_paths
-                
-            elif MAX_KERNELS > 1:
-                # parallelize the computation
-                results = Parallel(n_jobs=MAX_KERNELS)(
-                    delayed(calculate_shortest_paths)(v1, v2) for v1, v2 in self.vertex_pairs
-                )
-                for (v1, v2), all_paths in zip(self.vertex_pairs, results):
-                    if not all_paths:
-                        raise ValueError(f"Error, no path found between vertex {v1} and vertex {v2}")
-                    paths_dict[v1][v2] = all_paths
-            else:
-                raise ValueError("MAX_KERNELS need to be a positive integer.")
+            return dict(nx.all_pairs_all_shortest_paths(_G, _weights, method=algorithm) )
         else:
             raise ValueError("Invalid algorithm choice.")
         
-        return paths_dict
 
     def least_weighted_path_for_pair(self,_G: Graph, _s: int, _d: int, _weights: callable, algorithm: str) -> dict:
         # the following algorithms return only one least-weighted path that the algorithm encouters,

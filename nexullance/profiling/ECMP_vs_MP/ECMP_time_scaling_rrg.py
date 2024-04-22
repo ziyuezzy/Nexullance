@@ -52,7 +52,7 @@ def profile(config: tuple, traffic_pattern: str, _shift: int):
 
     # apply simple ECMP_ASP: (to make sure the input matrix for all nexu methods are the same)
     start_time = time.time()
-    ASP = _network.calculate_all_shortest_paths()
+    ASP, _ = _network.calculate_all_shortest_paths()
     ASP_time = time.time() - start_time
 
     start_time = time.time()
