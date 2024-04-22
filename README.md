@@ -88,18 +88,6 @@ Nexullance_MP: a near-optimal LP formulation
 Nexullance_IT: a heuristic to be developed
 
 
-# TODOs: 
-test Nexullance_OPT, Nexullance_MP 
-write a function to calculate $\Phi$ ( first check $\mu$ value )
-
-implement Nexullance_IT
-
-
-Bayesian Optimization: 
-https://github.com/bayesian-optimization/BayesianOptimization
-
-
-
 # Update April 2024:
 
 There are some useful functions in networkx source code that are not in the documentation, such as "single_source_all_shortest_paths" and "all_pairs_all_shortest_paths"
