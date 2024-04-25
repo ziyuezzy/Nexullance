@@ -4,21 +4,32 @@ from statistics import mean
 import numpy as np
 import random
 
-#Configurations:
-#slimfly configurations:
-# sf_configs= [722]
-sf_configs= [(722, 29), (1058, 35)]
-#jellyfish configurations:
-jf_configs =  [(722, 29), (900,32), (1058, 35)]
-#GDBG configurations, the degree is doubled because it is a directed graph: 
-gdbg_configs = [(722, 29), (900,32), (1058, 35)]
-#Equality configurations:
-eq_configs= [ # Note that E443 config is fault on the equality paper, so here it is commented out
-# (800, 31, [-1, 1, 27, 39, 45, 105, 215, 327, 365, 401, 455, 491, 523, 545, 547, 605, 653, 701, 715, 771, 801, 813, 865, 875, 955], [70, 180, 320, 430], "E443"),
-(900, 32, [-1, 1, 23, 25, 55, 121, 135, 165, 177, 333, 457, 475, 495, 543, 549, 557, 585, 615, 717, 727], [70, 130, 194, 256, 320, 360], "E441"),
-(1000, 33, [-1, 1, 27, 39, 45, 105, 215, 327, 365, 401, 455, 491, 523, 545, 547, 605, 653, 701, 715, 771, 801, 813, 865, 875, 955], [70, 180, 320, 430], "E442")
-]
-ddf_configs=[(264, 11), (876, 17), (1386, 20)]
+# # 10 < R < 300
+# slimfly configurations:
+sf_configs = [(18, 5), (32, 6), (50, 7), (98, 11), 
+                (128, 12), (162, 13), (242, 17)]
+
+ddf_configs = [(36, 5), (114, 8), (264, 11)]
+
+pf_configs = [(7, 3), (13, 4), (21, 5), (31, 6), (57, 8), (73, 9), 
+                    (91, 10), (133, 12), (183, 14), (273, 17),]
+
+
+# #Configurations:
+# #slimfly configurations:
+# # sf_configs= [722]
+# sf_configs= [(722, 29), (1058, 35)]
+# #jellyfish configurations:
+# jf_configs =  [(722, 29), (900,32), (1058, 35)]
+# #GDBG configurations, the degree is doubled because it is a directed graph: 
+# gdbg_configs = [(722, 29), (900,32), (1058, 35)]
+# #Equality configurations:
+# eq_configs= [ # Note that E443 config is fault on the equality paper, so here it is commented out
+# # (800, 31, [-1, 1, 27, 39, 45, 105, 215, 327, 365, 401, 455, 491, 523, 545, 547, 605, 653, 701, 715, 771, 801, 813, 865, 875, 955], [70, 180, 320, 430], "E443"),
+# (900, 32, [-1, 1, 23, 25, 55, 121, 135, 165, 177, 333, 457, 475, 495, 543, 549, 557, 585, 615, 717, 727], [70, 130, 194, 256, 320, 360], "E441"),
+# (1000, 33, [-1, 1, 27, 39, 45, 105, 215, 327, 365, 401, 455, 491, 523, 545, 547, 605, 653, 701, 715, 771, 801, 813, 865, 875, 955], [70, 180, 320, 430], "E442")
+# ]
+# ddf_configs=[(264, 11), (876, 17), (1386, 20)]
 
 def process_path_dict(path_dict):
     # input is a path dictionary
@@ -346,14 +357,31 @@ def generate_diagonal_traffic_pattern(num_routers, EPs_per_router, offset):
 
     return traffic_matrix
 
-def generate_uniform_cluster_pattern(num_routers, EPs_per_router):
+def generate_uniform_cluster_pattern(num_routers, EPs_per_router, num_routers_per_cluster):
+    # All endpoints in a few Routers are clustered, each cluster has a uniform traffic.
+    assert(num_routers_per_cluster>1, "better to be more than 1")
     total_num_EP=EPs_per_router*num_routers
     traffic_matrix=np.zeros((total_num_EP, total_num_EP))
-    for e in range(EPs_per_router):
-        for i in range(num_routers):
-            for j in range(num_routers):
-                if i != j :
-                    traffic_matrix[i*EPs_per_router+e][j*EPs_per_router+e]=1
+    num_clusters = num_routers//num_routers_per_cluster
+    assert(0 == num_routers%num_routers_per_cluster, "better to be divisible")
+    for cluster_id in range(num_clusters):
+        start_EP=cluster_id*EPs_per_router*num_routers_per_cluster
+        end_EP=(cluster_id+1)*EPs_per_router*num_routers_per_cluster
+        for ep1 in range(start_EP, end_EP):
+            for ep2 in range(start_EP, end_EP):
+                if ep1!=ep2:
+                    traffic_matrix[ep1][ep2]=1
+    return traffic_matrix
+
+def generate_random_permutation_pattern(num_routers, EPs_per_router, seed=0):
+    random.seed(seed)
+    total_num_EP=EPs_per_router*num_routers
+    traffic_matrix=np.zeros((total_num_EP, total_num_EP))
+    for i in range(total_num_EP):
+        random_dest = random.randint(0,total_num_EP-2)
+        if random_dest >=i:
+            random_dest+=1 # no self-loop demands
+        traffic_matrix[i][random_dest]=1
     return traffic_matrix
 
 def generate_random_cluster_pattern(num_routers, EPs_per_router, num_clusters=None, seed=0):
