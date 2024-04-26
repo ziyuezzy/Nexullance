@@ -30,8 +30,9 @@ def main():
             EPR = (D+1)//2
 
             _network = Slimflytopo(V, D)
-            ASP, _ = _network.calculate_all_k_shortest_paths(8)
+            ASP, _ = _network.calculate_all_shortest_paths()
             ECMP_ASP = gl.ECMP(ASP)
+            ECMP_8SP = gl.ECMP(_network.calculate_all_k_shortest_paths(8)[0])
 
             traffic_pattern = "uniform"
             M_EPs = gl.generate_uniform_traffic_pattern(V, EPR)
@@ -41,7 +42,8 @@ def main():
             # adapt the traffic scaling factor to 10x saturation
             traffic_scaling = 10.0/max(max_local_link_load, max_remote_link_load)
             M_EPs = traffic_scaling * M_EPs
-            remote_link_flows, local_link_flows = _network.distribute_M_EPs_on_weighted_paths(ECMP_ASP, EPR, M_EPs)
+            
+            remote_link_flows, local_link_flows = _network.distribute_M_EPs_on_weighted_paths(ECMP_8SP, EPR, M_EPs)
             max_remote_link_load = np.max(remote_link_flows)/Cap_remote
             max_local_link_load = np.max(local_link_flows)/Cap_local
             Phi=gl.network_total_throughput(M_EPs, max_remote_link_load, max_local_link_load)
@@ -56,7 +58,8 @@ def main():
             # adapt the traffic scaling factor to 10x saturation
             traffic_scaling = 10.0/max(max_local_link_load, max_remote_link_load)
             M_EPs = traffic_scaling * M_EPs
-            remote_link_flows, local_link_flows = _network.distribute_M_EPs_on_weighted_paths(ECMP_ASP, EPR, M_EPs)
+            
+            remote_link_flows, local_link_flows = _network.distribute_M_EPs_on_weighted_paths(ECMP_8SP, EPR, M_EPs)
             max_remote_link_load = np.max(remote_link_flows)/Cap_remote
             max_local_link_load = np.max(local_link_flows)/Cap_local
             Phi=gl.network_total_throughput(M_EPs, max_remote_link_load, max_local_link_load)
@@ -71,7 +74,8 @@ def main():
             # adapt the traffic scaling factor to 10x saturation
             traffic_scaling = 10.0/max(max_local_link_load, max_remote_link_load)
             M_EPs = traffic_scaling * M_EPs
-            remote_link_flows, local_link_flows = _network.distribute_M_EPs_on_weighted_paths(ECMP_ASP, EPR, M_EPs)
+            
+            remote_link_flows, local_link_flows = _network.distribute_M_EPs_on_weighted_paths(ECMP_8SP, EPR, M_EPs)
             max_remote_link_load = np.max(remote_link_flows)/Cap_remote
             max_local_link_load = np.max(local_link_flows)/Cap_local
             Phi=gl.network_total_throughput(M_EPs, max_remote_link_load, max_local_link_load)
@@ -86,7 +90,8 @@ def main():
             # adapt the traffic scaling factor to 10x saturation
             traffic_scaling = 10.0/max(max_local_link_load, max_remote_link_load)
             M_EPs = traffic_scaling * M_EPs
-            remote_link_flows, local_link_flows = _network.distribute_M_EPs_on_weighted_paths(ECMP_ASP, EPR, M_EPs)
+            
+            remote_link_flows, local_link_flows = _network.distribute_M_EPs_on_weighted_paths(ECMP_8SP, EPR, M_EPs)
             max_remote_link_load = np.max(remote_link_flows)/Cap_remote
             max_local_link_load = np.max(local_link_flows)/Cap_local
             Phi=gl.network_total_throughput(M_EPs, max_remote_link_load, max_local_link_load)
@@ -101,7 +106,8 @@ def main():
             # adapt the traffic scaling factor to 10x saturation
             traffic_scaling = 10.0/max(max_local_link_load, max_remote_link_load)
             M_EPs = traffic_scaling * M_EPs
-            remote_link_flows, local_link_flows = _network.distribute_M_EPs_on_weighted_paths(ECMP_ASP, EPR, M_EPs)
+            
+            remote_link_flows, local_link_flows = _network.distribute_M_EPs_on_weighted_paths(ECMP_8SP, EPR, M_EPs)
             max_remote_link_load = np.max(remote_link_flows)/Cap_remote
             max_local_link_load = np.max(local_link_flows)/Cap_local
             Phi=gl.network_total_throughput(M_EPs, max_remote_link_load, max_local_link_load)
@@ -116,7 +122,8 @@ def main():
             # adapt the traffic scaling factor to 10x saturation
             traffic_scaling = 10.0/max(max_local_link_load, max_remote_link_load)
             M_EPs = traffic_scaling * M_EPs
-            remote_link_flows, local_link_flows = _network.distribute_M_EPs_on_weighted_paths(ECMP_ASP, EPR, M_EPs)
+            
+            remote_link_flows, local_link_flows = _network.distribute_M_EPs_on_weighted_paths(ECMP_8SP, EPR, M_EPs)
             max_remote_link_load = np.max(remote_link_flows)/Cap_remote
             max_local_link_load = np.max(local_link_flows)/Cap_local
             Phi=gl.network_total_throughput(M_EPs, max_remote_link_load, max_local_link_load)
