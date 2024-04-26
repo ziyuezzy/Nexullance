@@ -9,6 +9,7 @@ import sys
 sys.path.append(os.path.abspath(os.path.join(os.getcwd(), '../..')))
 sys.path.append(os.path.abspath(os.path.join(os.getcwd(), '../../..')))
 from topologies.DDF import DDFtopo
+from nexullance.Nexullance_OPT import Nexullance_OPT
 import globals as gl
 import numpy as np
 import csv
@@ -44,7 +45,10 @@ def main():
             remote_link_flows, local_link_flows = _network.distribute_M_EPs_on_weighted_paths(ECMP_ASP, EPR, M_EPs)
             max_remote_link_load = np.max(remote_link_flows)/Cap_remote
             max_local_link_load = np.max(local_link_flows)/Cap_local
-            Phi=gl.network_total_throughput(M_EPs, max_remote_link_load, max_local_link_load)
+            nexu = Nexullance_OPT(_network.nx_graph, gl.convert_M_EPs_to_M_R(M_EPs, V, EPR), Cap_remote, 0, False)
+            nexu.init_model()
+            Lremote_NEXU_OPT = nexu.solve()
+            Phi = gl.network_total_throughput(M_EPs, Lremote_NEXU_OPT, max_local_link_load)
             csvwriter.writerow([V, D, EPR, traffic_pattern, Phi, Phi/(V*EPR)])
             csvfile.flush()
 
@@ -59,7 +63,10 @@ def main():
             remote_link_flows, local_link_flows = _network.distribute_M_EPs_on_weighted_paths(ECMP_ASP, EPR, M_EPs)
             max_remote_link_load = np.max(remote_link_flows)/Cap_remote
             max_local_link_load = np.max(local_link_flows)/Cap_local
-            Phi=gl.network_total_throughput(M_EPs, max_remote_link_load, max_local_link_load)
+            nexu = Nexullance_OPT(_network.nx_graph, gl.convert_M_EPs_to_M_R(M_EPs, V, EPR), Cap_remote, 0, False)
+            nexu.init_model()
+            Lremote_NEXU_OPT = nexu.solve()
+            Phi = gl.network_total_throughput(M_EPs, Lremote_NEXU_OPT, max_local_link_load)
             csvwriter.writerow([V, D, EPR, traffic_pattern, Phi, Phi/(V*EPR)])
             csvfile.flush()
 
@@ -74,7 +81,10 @@ def main():
             remote_link_flows, local_link_flows = _network.distribute_M_EPs_on_weighted_paths(ECMP_ASP, EPR, M_EPs)
             max_remote_link_load = np.max(remote_link_flows)/Cap_remote
             max_local_link_load = np.max(local_link_flows)/Cap_local
-            Phi=gl.network_total_throughput(M_EPs, max_remote_link_load, max_local_link_load)
+            nexu = Nexullance_OPT(_network.nx_graph, gl.convert_M_EPs_to_M_R(M_EPs, V, EPR), Cap_remote, 0, False)
+            nexu.init_model()
+            Lremote_NEXU_OPT = nexu.solve()
+            Phi = gl.network_total_throughput(M_EPs, Lremote_NEXU_OPT, max_local_link_load)
             csvwriter.writerow([V, D, EPR, traffic_pattern, Phi, Phi/(V*EPR)])
             csvfile.flush()
 
@@ -89,7 +99,10 @@ def main():
             remote_link_flows, local_link_flows = _network.distribute_M_EPs_on_weighted_paths(ECMP_ASP, EPR, M_EPs)
             max_remote_link_load = np.max(remote_link_flows)/Cap_remote
             max_local_link_load = np.max(local_link_flows)/Cap_local
-            Phi=gl.network_total_throughput(M_EPs, max_remote_link_load, max_local_link_load)
+            nexu = Nexullance_OPT(_network.nx_graph, gl.convert_M_EPs_to_M_R(M_EPs, V, EPR), Cap_remote, 0, False)
+            nexu.init_model()
+            Lremote_NEXU_OPT = nexu.solve()
+            Phi = gl.network_total_throughput(M_EPs, Lremote_NEXU_OPT, max_local_link_load)
             csvwriter.writerow([V, D, EPR, traffic_pattern, Phi, Phi/(V*EPR)])
             csvfile.flush()
 
@@ -104,7 +117,10 @@ def main():
             remote_link_flows, local_link_flows = _network.distribute_M_EPs_on_weighted_paths(ECMP_ASP, EPR, M_EPs)
             max_remote_link_load = np.max(remote_link_flows)/Cap_remote
             max_local_link_load = np.max(local_link_flows)/Cap_local
-            Phi=gl.network_total_throughput(M_EPs, max_remote_link_load, max_local_link_load)
+            nexu = Nexullance_OPT(_network.nx_graph, gl.convert_M_EPs_to_M_R(M_EPs, V, EPR), Cap_remote, 0, False)
+            nexu.init_model()
+            Lremote_NEXU_OPT = nexu.solve()
+            Phi = gl.network_total_throughput(M_EPs, Lremote_NEXU_OPT, max_local_link_load)
             csvwriter.writerow([V, D, EPR, traffic_pattern, Phi, Phi/(V*EPR)])
             csvfile.flush()
 
@@ -119,7 +135,10 @@ def main():
             remote_link_flows, local_link_flows = _network.distribute_M_EPs_on_weighted_paths(ECMP_ASP, EPR, M_EPs)
             max_remote_link_load = np.max(remote_link_flows)/Cap_remote
             max_local_link_load = np.max(local_link_flows)/Cap_local
-            Phi=gl.network_total_throughput(M_EPs, max_remote_link_load, max_local_link_load)
+            nexu = Nexullance_OPT(_network.nx_graph, gl.convert_M_EPs_to_M_R(M_EPs, V, EPR), Cap_remote, 0, False)
+            nexu.init_model()
+            Lremote_NEXU_OPT = nexu.solve()
+            Phi = gl.network_total_throughput(M_EPs, Lremote_NEXU_OPT, max_local_link_load)
             csvwriter.writerow([V, D, EPR, traffic_pattern, Phi, Phi/(V*EPR)])
             csvfile.flush()
 

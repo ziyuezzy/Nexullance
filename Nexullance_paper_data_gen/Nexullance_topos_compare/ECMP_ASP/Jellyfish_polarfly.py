@@ -8,7 +8,7 @@ import os
 import sys
 sys.path.append(os.path.abspath(os.path.join(os.getcwd(), '../..')))
 sys.path.append(os.path.abspath(os.path.join(os.getcwd(), '../../..')))
-from topologies.DDF import DDFtopo
+from topologies.RRG import RRGtopo
 import globals as gl
 import numpy as np
 import csv
@@ -19,17 +19,18 @@ Cap_local = 10 #GBps
 
 def main():
     # initialize output data file
-    filename = f'DDF.csv'
+    filename = f'RRG_polarfly.csv'
     with open(filename, 'w', newline='') as csvfile:
         csvwriter = csv.writer(csvfile)
         csvwriter.writerow(['V', 'D', 'EPR', 'traffic', 'Phi', 'Phi_per_EP'])
 
-        configs = gl.ddf_configs
+        configs = gl.pf_regular_configs
         for V, D in configs:
             # various traffic patterns
             EPR = (D+1)//2
 
-            _network = DDFtopo(V, D)
+            _network = RRGtopo(V, D)
+            
             ASP, _ = _network.calculate_all_shortest_paths()
             ECMP_ASP = gl.ECMP(ASP)
 

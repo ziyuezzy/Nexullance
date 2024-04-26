@@ -11,8 +11,10 @@ sf_configs = [(18, 5), (32, 6), (50, 7), (98, 11),
 
 ddf_configs = [(36, 5), (114, 8), (264, 11)]
 
-pf_configs = [(7, 3), (13, 4), (21, 5), (31, 6), (57, 8), (73, 9), 
-                    (91, 10), (133, 12), (183, 14), (273, 17),]
+# this contains irregular graph, which is not considered in this work
+pf_configs = [(7, 3), (13, 4), (21, 5), (31, 6), (57, 8), (73, 9), (91, 10), (133, 12), (183, 14), (273, 17),]
+
+pf_regular_configs = [(v,d) for v, d in pf_configs if v*d%2==0]
 
 
 # #Configurations:
@@ -323,31 +325,31 @@ def clean_up_weighted_paths(weighted_path_dict):
     return clean_weighted_path_dict
 
 
-def generate_uniform_traffic_pattern(num_routers, EPs_per_router):
-    total_num_EP=EPs_per_router*num_routers
+def generate_uniform_traffic_pattern(num_routers, EPR):
+    total_num_EP=EPR*num_routers
     traffic_matrix=np.ones((total_num_EP, total_num_EP))
     for i in range(total_num_EP):
         traffic_matrix[i][i]=0
     return traffic_matrix
 
-def generate_shift_traffic_pattern(num_routers, EPs_per_router, shift):
-    total_num_EP=EPs_per_router*num_routers
+def generate_shift_traffic_pattern(num_routers, EPR, shift):
+    total_num_EP=EPR*num_routers
     traffic_matrix=np.zeros((total_num_EP, total_num_EP))
     for i in range(total_num_EP):
         traffic_matrix[i][(i+shift)%total_num_EP]=1
 
     return traffic_matrix
 
-def generate_half_shift_traffic_pattern(num_routers, EPs_per_router):
-    total_num_EP=EPs_per_router*num_routers
+def generate_half_shift_traffic_pattern(num_routers, EPR):
+    total_num_EP=EPR*num_routers
     traffic_matrix=np.zeros((total_num_EP, total_num_EP))
     for i in range(total_num_EP):
         traffic_matrix[i][(i+total_num_EP//2)%total_num_EP]=1
 
     return traffic_matrix
 
-def generate_diagonal_traffic_pattern(num_routers, EPs_per_router, offset):
-    total_num_EP=EPs_per_router*num_routers
+def generate_diagonal_traffic_pattern(num_routers, EPR, offset):
+    total_num_EP=EPR*num_routers
     traffic_matrix=np.zeros((total_num_EP, total_num_EP))
     for i in range(total_num_EP):
         dst = i+offset
@@ -357,25 +359,24 @@ def generate_diagonal_traffic_pattern(num_routers, EPs_per_router, offset):
 
     return traffic_matrix
 
-def generate_uniform_cluster_pattern(num_routers, EPs_per_router, num_routers_per_cluster):
-    # All endpoints in a few Routers are clustered, each cluster has a uniform traffic.
-    assert(num_routers_per_cluster>1, "better to be more than 1")
-    total_num_EP=EPs_per_router*num_routers
+def generate_uniform_cluster_pattern(num_routers, EPR, num_clusters):
+    # All endpoints are clustered in a number of clusters, each cluster has a uniform traffic among EPs.
+    assert(num_clusters>num_routers, "better to be more than 1 routers per cluster")
+    total_num_EP=EPR*num_routers
     traffic_matrix=np.zeros((total_num_EP, total_num_EP))
-    num_clusters = num_routers//num_routers_per_cluster
-    assert(0 == num_routers%num_routers_per_cluster, "better to be divisible")
+    num_EPs_per_cluster = total_num_EP//num_clusters
     for cluster_id in range(num_clusters):
-        start_EP=cluster_id*EPs_per_router*num_routers_per_cluster
-        end_EP=(cluster_id+1)*EPs_per_router*num_routers_per_cluster
+        start_EP=cluster_id*num_EPs_per_cluster
+        end_EP=min([total_num_EP, (cluster_id+1)*num_EPs_per_cluster])
         for ep1 in range(start_EP, end_EP):
             for ep2 in range(start_EP, end_EP):
                 if ep1!=ep2:
                     traffic_matrix[ep1][ep2]=1
     return traffic_matrix
 
-def generate_random_permutation_pattern(num_routers, EPs_per_router, seed=0):
+def generate_random_permutation_pattern(num_routers, EPR, seed=0):
     random.seed(seed)
-    total_num_EP=EPs_per_router*num_routers
+    total_num_EP=EPR*num_routers
     traffic_matrix=np.zeros((total_num_EP, total_num_EP))
     for i in range(total_num_EP):
         random_dest = random.randint(0,total_num_EP-2)
@@ -384,11 +385,11 @@ def generate_random_permutation_pattern(num_routers, EPs_per_router, seed=0):
         traffic_matrix[i][random_dest]=1
     return traffic_matrix
 
-def generate_random_cluster_pattern(num_routers, EPs_per_router, num_clusters=None, seed=0):
+def generate_random_cluster_pattern(num_routers, EPR, num_clusters=None, seed=0):
     if num_clusters==None:
         num_clusters=num_routers
     random.seed(seed)
-    total_num_EP=EPs_per_router*num_routers
+    total_num_EP=EPR*num_routers
     EPs_per_cluster = total_num_EP//num_clusters
     traffic_matrix=np.zeros((total_num_EP, total_num_EP))
     EPs=list(range(total_num_EP))
@@ -403,35 +404,35 @@ def generate_random_cluster_pattern(num_routers, EPs_per_router, num_clusters=No
     return traffic_matrix
 
 
-# def generate_all_reduce_traffic_pattern(num_routers, EPs_per_router, _center):
+# def generate_all_reduce_traffic_pattern(num_routers, EPR, _center):
 #     # center as the center of all-reduce operation
-#     total_num_EP=EPs_per_router*num_routers
+#     total_num_EP=EPR*num_routers
 #     traffic_matrix=np.zeros((total_num_EP, total_num_EP))
 #     for i in range(total_num_EP):
 #         if i != _center:
 #             traffic_matrix[i][_center]=1 # TODO: this is wrong, should be a tree structure
 #     return traffic_matrix
 
-# def generate_broadcast_traffic_pattern(num_routers, EPs_per_router, _center):
+# def generate_broadcast_traffic_pattern(num_routers, EPR, _center):
 #     # center as the center of the broadcast operation
-#     total_num_EP=EPs_per_router*num_routers
+#     total_num_EP=EPR*num_routers
 #     traffic_matrix=np.zeros((total_num_EP, total_num_EP))
 #     for i in range(total_num_EP):
 #         if i != _center:
 #             traffic_matrix[_center][i]=1 # TODO: this is wrong, should be a tree structure
 #     return traffic_matrix
 
-def convert_M_EPs_to_M_R(M_EPs, num_routers, EPs_per_router):
-    assert(len(M_EPs)==len(M_EPs[0])==num_routers*EPs_per_router)
+def convert_M_EPs_to_M_R(M_EPs, num_routers, EPR):
+    assert(len(M_EPs)==len(M_EPs[0])==num_routers*EPR)
     M_R_traffic_matrix=np.zeros((num_routers, num_routers))
     for s in range(num_routers):
         for d in range(num_routers):
             if s==d:
                 continue
             sum_M_R_flow=0
-            for sp in range(EPs_per_router):
-                for dp in range(EPs_per_router):
-                    sum_M_R_flow+=M_EPs[sp+s*EPs_per_router][dp+d*EPs_per_router]
+            for sp in range(EPR):
+                for dp in range(EPR):
+                    sum_M_R_flow+=M_EPs[sp+s*EPR][dp+d*EPR]
             M_R_traffic_matrix[s][d]=sum_M_R_flow
 
     return M_R_traffic_matrix

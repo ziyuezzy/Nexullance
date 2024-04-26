@@ -30,7 +30,7 @@ def main():
             EPR = (D+1)//2
 
             _network = DDFtopo(V, D)
-            ASP, _ = _network.calculate_all_shortest_paths()
+            ASP, _ = _network.calculate_all_k_shortest_paths(8)
             ECMP_ASP = gl.ECMP(ASP)
 
             traffic_pattern = "uniform"
