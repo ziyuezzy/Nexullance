@@ -18,3 +18,4 @@ nexullance/profiling/**.pkl
 
 # white listing
 !nexullance/*.ipynb
+!test_Nexullance_MMR/*.csv
