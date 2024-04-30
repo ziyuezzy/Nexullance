@@ -16,7 +16,7 @@ import csv
 
 
 Cap_remote = 10 #GBps
-Cap_local = 10 #GBps
+Cap_local = 10 #GBpsz
 
 def main():
     # initialize output data file
@@ -25,7 +25,7 @@ def main():
         csvwriter = csv.writer(csvfile)
         csvwriter.writerow(['V', 'D', 'EPR', 'traffic', 'Phi', 'Phi_per_EP'])
 
-        configs = gl.ddf_configs
+        configs = [(36, 5)]
         for V, D in configs:
             # various traffic patterns
             EPR = (D+1)//2

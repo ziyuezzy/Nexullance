@@ -22,7 +22,7 @@ def main():
     filename = f'Polarfly.csv'
     with open(filename, 'w', newline='') as csvfile:
         csvwriter = csv.writer(csvfile)
-        csvwriter.writerow(['V', 'D', 'EPR', 'traffic', 'Phi', 'Phi_per_EP'])
+        csvwriter.writerow(['V', 'D', 'EPR', 'traffic', 'Phi', 'Phi_per_EP', 'mu'])
 
         configs = gl.pf_regular_configs
         for V, D in configs:
@@ -45,7 +45,7 @@ def main():
             max_remote_link_load = np.max(remote_link_flows)/Cap_remote
             max_local_link_load = np.max(local_link_flows)/Cap_local
             Phi=gl.network_total_throughput(M_EPs, max_remote_link_load, max_local_link_load)
-            csvwriter.writerow([V, D, EPR, traffic_pattern, Phi, Phi/(V*EPR)])
+            csvwriter.writerow([V, D, EPR, traffic_pattern, Phi, Phi/(V*EPR), max_local_link_load/max_remote_link_load])
             csvfile.flush()
 
             traffic_pattern = "nearst-neighbour"
@@ -60,7 +60,7 @@ def main():
             max_remote_link_load = np.max(remote_link_flows)/Cap_remote
             max_local_link_load = np.max(local_link_flows)/Cap_local
             Phi=gl.network_total_throughput(M_EPs, max_remote_link_load, max_local_link_load)
-            csvwriter.writerow([V, D, EPR, traffic_pattern, Phi, Phi/(V*EPR)])
+            csvwriter.writerow([V, D, EPR, traffic_pattern, Phi, Phi/(V*EPR), max_local_link_load/max_remote_link_load])
             csvfile.flush()
 
             traffic_pattern = "shift_1"
@@ -75,7 +75,7 @@ def main():
             max_remote_link_load = np.max(remote_link_flows)/Cap_remote
             max_local_link_load = np.max(local_link_flows)/Cap_local
             Phi=gl.network_total_throughput(M_EPs, max_remote_link_load, max_local_link_load)
-            csvwriter.writerow([V, D, EPR, traffic_pattern, Phi, Phi/(V*EPR)])
+            csvwriter.writerow([V, D, EPR, traffic_pattern, Phi, Phi/(V*EPR), max_local_link_load/max_remote_link_load])
             csvfile.flush()
 
             traffic_pattern = "shift_half"
@@ -90,7 +90,7 @@ def main():
             max_remote_link_load = np.max(remote_link_flows)/Cap_remote
             max_local_link_load = np.max(local_link_flows)/Cap_local
             Phi=gl.network_total_throughput(M_EPs, max_remote_link_load, max_local_link_load)
-            csvwriter.writerow([V, D, EPR, traffic_pattern, Phi, Phi/(V*EPR)])
+            csvwriter.writerow([V, D, EPR, traffic_pattern, Phi, Phi/(V*EPR), max_local_link_load/max_remote_link_load])
             csvfile.flush()
 
             traffic_pattern = "router-cluster"
@@ -105,7 +105,7 @@ def main():
             max_remote_link_load = np.max(remote_link_flows)/Cap_remote
             max_local_link_load = np.max(local_link_flows)/Cap_local
             Phi=gl.network_total_throughput(M_EPs, max_remote_link_load, max_local_link_load)
-            csvwriter.writerow([V, D, EPR, traffic_pattern, Phi, Phi/(V*EPR)])
+            csvwriter.writerow([V, D, EPR, traffic_pattern, Phi, Phi/(V*EPR), max_local_link_load/max_remote_link_load])
             csvfile.flush()
 
             traffic_pattern = "random-permute"
@@ -120,7 +120,7 @@ def main():
             max_remote_link_load = np.max(remote_link_flows)/Cap_remote
             max_local_link_load = np.max(local_link_flows)/Cap_local
             Phi=gl.network_total_throughput(M_EPs, max_remote_link_load, max_local_link_load)
-            csvwriter.writerow([V, D, EPR, traffic_pattern, Phi, Phi/(V*EPR)])
+            csvwriter.writerow([V, D, EPR, traffic_pattern, Phi, Phi/(V*EPR), max_local_link_load/max_remote_link_load])
             csvfile.flush()
 
 
