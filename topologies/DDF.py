@@ -1,10 +1,10 @@
 import networkx as nx
-from . import HPC_topo
+from .HPC_topo import HPC_topo
 from statistics import mean
 import random
 
 # Dally DragonFly (DDF) network topology
-class DDFtopo(HPC_topo.HPC_topo):
+class DDFtopo(HPC_topo):
 
     def __init__(self, *args, **kwargs): 
         # DF parameters: Number of routers per group = a, Number of groups = g,
@@ -116,7 +116,7 @@ class DDFtopo(HPC_topo.HPC_topo):
                         path=[v1, next_router, adjacent_r, v2]
             paths_dict[(v1, v2)].append(path)
         
-        return paths_dict
+        return paths_dict, "DDFunipath"
     
         
     def set_intergroup_link_failures(self, failure_ratio, seed=0):

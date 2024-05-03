@@ -1,23 +1,37 @@
 from statistics import mean
-import nexullance.LP_cvspy as LP_cvspy
+# import nexullance.LP_cvspy as LP_cvspy
+# import nexullance.LP_cvspy as LP_cvspy
 import numpy as np
 import random
 
-#Configurations:
-#slimfly configurations:
-# sf_configs= [722]
-sf_configs= [(722, 29), (1058, 35)]
-#jellyfish configurations:
-jf_configs =  [(722, 29), (900,32), (1058, 35)]
-#GDBG configurations, the degree is doubled because it is a directed graph: 
-gdbg_configs = [(722, 29), (900,32), (1058, 35)]
-#Equality configurations:
-eq_configs= [ # Note that E443 config is fault on the equality paper, so here it is commented out
-# (800, 31, [-1, 1, 27, 39, 45, 105, 215, 327, 365, 401, 455, 491, 523, 545, 547, 605, 653, 701, 715, 771, 801, 813, 865, 875, 955], [70, 180, 320, 430], "E443"),
-(900, 32, [-1, 1, 23, 25, 55, 121, 135, 165, 177, 333, 457, 475, 495, 543, 549, 557, 585, 615, 717, 727], [70, 130, 194, 256, 320, 360], "E441"),
-(1000, 33, [-1, 1, 27, 39, 45, 105, 215, 327, 365, 401, 455, 491, 523, 545, 547, 605, 653, 701, 715, 771, 801, 813, 865, 875, 955], [70, 180, 320, 430], "E442")
-]
-ddf_configs=[(264, 11), (876, 17), (1386, 20)]
+# # 10 < R < 300
+# slimfly configurations:
+sf_configs = [(18, 5), (32, 6), (50, 7), (98, 11), 
+                (128, 12), (162, 13), (242, 17)]
+
+ddf_configs = [(36, 5), (114, 8), (264, 11)]
+
+# this contains irregular graph, which is not considered in this work
+pf_configs = [(7, 3), (13, 4), (21, 5), (31, 6), (57, 8), (73, 9), (91, 10), (133, 12), (183, 14), (273, 17)]
+
+pf_regular_configs = [(v,d) for v, d in pf_configs if v*d%2==0]
+
+
+# #Configurations:
+# #slimfly configurations:
+# # sf_configs= [722]
+# sf_configs= [(722, 29), (1058, 35)]
+# #jellyfish configurations:
+# jf_configs =  [(722, 29), (900,32), (1058, 35)]
+# #GDBG configurations, the degree is doubled because it is a directed graph: 
+# gdbg_configs = [(722, 29), (900,32), (1058, 35)]
+# #Equality configurations:
+# eq_configs= [ # Note that E443 config is fault on the equality paper, so here it is commented out
+# # (800, 31, [-1, 1, 27, 39, 45, 105, 215, 327, 365, 401, 455, 491, 523, 545, 547, 605, 653, 701, 715, 771, 801, 813, 865, 875, 955], [70, 180, 320, 430], "E443"),
+# (900, 32, [-1, 1, 23, 25, 55, 121, 135, 165, 177, 333, 457, 475, 495, 543, 549, 557, 585, 615, 717, 727], [70, 130, 194, 256, 320, 360], "E441"),
+# (1000, 33, [-1, 1, 27, 39, 45, 105, 215, 327, 365, 401, 455, 491, 523, 545, 547, 605, 653, 701, 715, 771, 801, 813, 865, 875, 955], [70, 180, 320, 430], "E442")
+# ]
+# ddf_configs=[(264, 11), (876, 17), (1386, 20)]
 
 def process_path_dict(path_dict):
     # input is a path dictionary
@@ -77,7 +91,6 @@ def count_disjoint_paths(paths_dict):
         disjoint_paths_ratio.append(count/len(paths))
         disjoint_paths_count.append(count)
     return disjoint_paths_count, disjoint_paths_ratio
-
 
 
 def calculate_data_shortest_paths(topology_instance, config):
@@ -269,23 +282,26 @@ def calculate_data_paths_within_length(topology_instance, config, max_path_lengt
     print(f"calculation done for {config} with shorter-than-{max_path_length} paths routing")
     return _result, list(topology_instance.nx_graph.edges()), paths_dict
 
-def convert_path_dict_to_weighted_path_dict(path_dict):
-    weighted_path_dict={}
+def ECMP(path_dict): # input is a dictionary (key=(src, dest))
+    # convert a path dict to a weighted path dict using equal-cost multi-path routing (ECMP)
+    ECMP_path_dict={}
     for (u,v), paths in path_dict.items():
-        weighted_path_dict[(u,v)]=[]
+        ECMP_path_dict[(u,v)]=[]
         for path in paths:
-            weighted_path_dict[(u,v)].append( (path, 1/len(paths)) )
-    return weighted_path_dict
+            ECMP_path_dict[(u,v)].append( (path, 1/len(paths)) ) 
+            # TODO: assign the residual weight to the last path, to avoid rounding errors?
+    return ECMP_path_dict
 
-
-# def convert_path_dict_to_weighted_path_dict_with_cost(path_dict):
-#     weighted_path_dict={}
-#     for (u,v), paths in path_dict.items():
-#         weighted_path_dict[(u,v)]=[]
-#         for path in paths:
-#             weighted_path_dict[(u,v)].append( [path, 1/len(paths), -1] )
-#     return weighted_path_dict
-
+def ECMP_nx(path_dict):  # input is a dictionary (key=src) of dictionary (key=dest), as in the style of networkx
+    # convert a path dict to a weighted path dict using equal-cost multi-path routing (ECMP)
+    ECMP_path_dict={}
+    for u, v_dict in path_dict.items():
+        ECMP_path_dict[u]={}
+        for v, paths in v_dict.items():
+            for path in paths:
+                ECMP_path_dict[u][v].append( (path, 1/len(paths)) ) 
+                # TODO: assign the residual weight to the last path, to avoid rounding errors?
+    return ECMP_path_dict
 
 def clean_up_weighted_paths(weighted_path_dict):
     clean_weighted_path_dict={}
@@ -309,37 +325,117 @@ def clean_up_weighted_paths(weighted_path_dict):
     return clean_weighted_path_dict
 
 
-
-
-def generate_uniform_traffic_pattern(num_routers, EPs_per_router):
-    total_num_EP=EPs_per_router*num_routers
+def generate_uniform_traffic_pattern(num_routers, EPR):
+    total_num_EP=EPR*num_routers
     traffic_matrix=np.ones((total_num_EP, total_num_EP))
     for i in range(total_num_EP):
         traffic_matrix[i][i]=0
     return traffic_matrix
 
-def generate_shift_traffic_pattern(num_routers, EPs_per_router):
-    total_num_EP=EPs_per_router*num_routers
+def generate_shift_traffic_pattern(num_routers, EPR, shift):
+    total_num_EP=EPR*num_routers
+    traffic_matrix=np.zeros((total_num_EP, total_num_EP))
+    for i in range(total_num_EP):
+        traffic_matrix[i][(i+shift)%total_num_EP]=1
+
+    return traffic_matrix
+
+def generate_half_shift_traffic_pattern(num_routers, EPR):
+    total_num_EP=EPR*num_routers
     traffic_matrix=np.zeros((total_num_EP, total_num_EP))
     for i in range(total_num_EP):
         traffic_matrix[i][(i+total_num_EP//2)%total_num_EP]=1
 
     return traffic_matrix
 
-def convert_p2p_traffic_matrix_to_R2R(p2p_traffic_matrix, num_routers, EPs_per_router):
-    assert(len(p2p_traffic_matrix)==len(p2p_traffic_matrix[0])==num_routers*EPs_per_router)
-    R2R_traffic_matrix=np.zeros((num_routers, num_routers))
+def generate_diagonal_traffic_pattern(num_routers, EPR, offset):
+    total_num_EP=EPR*num_routers
+    traffic_matrix=np.zeros((total_num_EP, total_num_EP))
+    for i in range(total_num_EP):
+        dst = i+offset
+        if dst < total_num_EP:
+            traffic_matrix[i][dst]=1
+            traffic_matrix[dst][i]=1
+
+    return traffic_matrix
+
+def generate_uniform_cluster_pattern(num_routers, EPR, num_clusters):
+    # All endpoints are clustered in a number of clusters, each cluster has a uniform traffic among EPs.
+    assert(num_clusters>num_routers, "better to be more than 1 routers per cluster")
+    total_num_EP=EPR*num_routers
+    traffic_matrix=np.zeros((total_num_EP, total_num_EP))
+    num_EPs_per_cluster = total_num_EP//num_clusters
+    for cluster_id in range(num_clusters):
+        start_EP=cluster_id*num_EPs_per_cluster
+        end_EP=min([total_num_EP, (cluster_id+1)*num_EPs_per_cluster])
+        for ep1 in range(start_EP, end_EP):
+            for ep2 in range(start_EP, end_EP):
+                if ep1!=ep2:
+                    traffic_matrix[ep1][ep2]=1
+    return traffic_matrix
+
+def generate_random_permutation_pattern(num_routers, EPR, seed=0):
+    random.seed(seed)
+    total_num_EP=EPR*num_routers
+    traffic_matrix=np.zeros((total_num_EP, total_num_EP))
+    for i in range(total_num_EP):
+        random_dest = random.randint(0,total_num_EP-2)
+        if random_dest >=i:
+            random_dest+=1 # no self-loop demands
+        traffic_matrix[i][random_dest]=1
+    return traffic_matrix
+
+def generate_random_cluster_pattern(num_routers, EPR, num_clusters=None, seed=0):
+    if num_clusters==None:
+        num_clusters=num_routers
+    random.seed(seed)
+    total_num_EP=EPR*num_routers
+    EPs_per_cluster = total_num_EP//num_clusters
+    traffic_matrix=np.zeros((total_num_EP, total_num_EP))
+    EPs=list(range(total_num_EP))
+    while EPs:
+        cluster=random.sample(EPs, EPs_per_cluster)
+        for v in cluster:
+            for u in cluster:
+                if v!=u:
+                    traffic_matrix[v][u]=1
+        for v in cluster:
+            EPs.remove(v)  
+    return traffic_matrix
+
+
+# def generate_all_reduce_traffic_pattern(num_routers, EPR, _center):
+#     # center as the center of all-reduce operation
+#     total_num_EP=EPR*num_routers
+#     traffic_matrix=np.zeros((total_num_EP, total_num_EP))
+#     for i in range(total_num_EP):
+#         if i != _center:
+#             traffic_matrix[i][_center]=1 # TODO: this is wrong, should be a tree structure
+#     return traffic_matrix
+
+# def generate_broadcast_traffic_pattern(num_routers, EPR, _center):
+#     # center as the center of the broadcast operation
+#     total_num_EP=EPR*num_routers
+#     traffic_matrix=np.zeros((total_num_EP, total_num_EP))
+#     for i in range(total_num_EP):
+#         if i != _center:
+#             traffic_matrix[_center][i]=1 # TODO: this is wrong, should be a tree structure
+#     return traffic_matrix
+
+def convert_M_EPs_to_M_R(M_EPs, num_routers, EPR):
+    assert(len(M_EPs)==len(M_EPs[0])==num_routers*EPR)
+    M_R_traffic_matrix=np.zeros((num_routers, num_routers))
     for s in range(num_routers):
         for d in range(num_routers):
             if s==d:
                 continue
-            sum_R2R_flow=0
-            for sp in range(EPs_per_router):
-                for dp in range(EPs_per_router):
-                    sum_R2R_flow+=p2p_traffic_matrix[sp+s*EPs_per_router][dp+d*EPs_per_router]
-            R2R_traffic_matrix[s][d]=sum_R2R_flow
+            sum_M_R_flow=0
+            for sp in range(EPR):
+                for dp in range(EPR):
+                    sum_M_R_flow+=M_EPs[sp+s*EPR][dp+d*EPR]
+            M_R_traffic_matrix[s][d]=sum_M_R_flow
 
-    return R2R_traffic_matrix
+    return M_R_traffic_matrix
 
 
 def evaluate_weighted_pathdict_LF_resilience(edgelist, weighted_path_dict, LFR, seed=0):
@@ -365,3 +461,53 @@ def evaluate_weighted_pathdict_LF_resilience(edgelist, weighted_path_dict, LFR, 
 
     return mean(list(success_rate.values()))
                     
+def local_link_flows_from_M_EPs(M_EPs):
+    local_link_flows=[]
+    M_EPs=np.array(M_EPs)
+    for row in M_EPs:
+        local_link_flows.append(np.sum(row))
+    for row in M_EPs.swapaxes(0,1):
+        local_link_flows.append(np.sum(row))
+    return local_link_flows
+
+def network_total_throughput(M_EPs, max_remote_link_load, max_local_link_load):
+    array_sum = np.sum(M_EPs)
+    if max_remote_link_load<1 and max_local_link_load<1:
+        return array_sum
+    else:
+        return array_sum / max([max_remote_link_load, max_local_link_load])
+
+
+
+# # automorphism methods using nauty:
+# import pynauty as nauty
+
+# def generate_nauty_graph_from_nx(nx_graph):
+#     adj_dict={n: list(nbrdict.keys()) for n, nbrdict in nx_graph.adjacency()}
+#     nauty_graph=nauty.Graph(nx_graph.number_of_nodes(), directed=False, adjacency_dict=adj_dict)
+#     return nauty_graph
+
+# def nauty_autgrp_verbose(nauty_graph, _verbose=True):
+#     # Compute the automorphism group
+#     aut_group = nauty.autgrp(nauty_graph)
+
+#     # Extract elements from the output tuple
+#     generators, grpsize1, grpsize2, orbits, numorbits = aut_group
+
+#     if _verbose:
+#         # Print the generators of the automorphism group
+#         print("Generators of the automorphism group:")
+#         print(generators)
+
+#         print("Size of the generator set:", len(generators))
+
+#         # print the size (order) of the group
+#         print("Size (order) of the automorphism group:", grpsize1*10**grpsize2)
+
+#         # Print the orbits of the vertices
+#         print("Orbits of the vertices:", orbits)
+
+#         # Print the number of orbits
+#         print("Number of orbits:", numorbits)
+
+#     return generators
