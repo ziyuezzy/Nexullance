@@ -4,8 +4,8 @@
 numpy, matplotlib, networkx, joblib (for multi-thread cpu algorithms), galois (for slimfly), gurobipy, (pynauty)
 
 install: 
-apt install python3 pip
-pip install numpy matplotlib networkx joblib galois gurobipy pynauty
+apt install python3 pip (need python 3.12)
+pip3.12 install numpy matplotlib networkx joblib galois gurobipy pynauty
 
 # classes in folder "topolgies/":
 Slimfly, RRG and Equality are implemented as child classes of "HPC_topo" which are based on undiretional graphs.

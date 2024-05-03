@@ -12,7 +12,7 @@ sf_configs = [(18, 5), (32, 6), (50, 7), (98, 11),
 ddf_configs = [(36, 5), (114, 8), (264, 11)]
 
 # this contains irregular graph, which is not considered in this work
-pf_configs = [(7, 3), (13, 4), (21, 5), (31, 6), (57, 8), (73, 9), (91, 10), (133, 12), (183, 14), (273, 17),]
+pf_configs = [(7, 3), (13, 4), (21, 5), (31, 6), (57, 8), (73, 9), (91, 10), (133, 12), (183, 14), (273, 17)]
 
 pf_regular_configs = [(v,d) for v, d in pf_configs if v*d%2==0]
 

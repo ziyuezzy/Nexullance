@@ -25,7 +25,7 @@ def main():
         csvwriter = csv.writer(csvfile)
         csvwriter.writerow(['V', 'D', 'EPR', 'traffic', 'Phi', 'Phi_per_EP'])
 
-        configs = gl.pf_regular_configs
+        configs = [(13, 4), (31, 6), (57, 8)]
         for V, D in configs:
             # various traffic patterns
             EPR = (D+1)//2
