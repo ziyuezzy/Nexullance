@@ -14,6 +14,8 @@ nexullance/bin
 nexullance/profiling/**.csv
 nexullance/profiling/**.pkl
 *.csv
+*.graphml
+*.austin
 
 
 # white listing

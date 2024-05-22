@@ -2,7 +2,7 @@ import os
 import sys
 sys.path.append(os.path.abspath(os.path.join(os.getcwd(), '../..')))
 sys.path.append(os.path.abspath(os.path.join(os.getcwd(), '../../..')))
-from topologies.Slimfly import Slimflytopo
+from topologies.RRG import RRGtopo
 # from Nexullance_IT import Nexullance_IT
 # from Nexullance_MP import Nexullance_MP
 from Nexullance_IT import Nexullance_IT
@@ -19,13 +19,13 @@ import pickle
 # 2. record time consumption
 # 3. record maximum RAM
 
-num_method_1 = 3
+num_method_1 = 1
 num_method_2 = 6
 
 def main():
 
     # initialize output data file
-    filename = f'data_Slimfly_IT_{num_method_1}+{num_method_2}.csv'
+    filename = f'data_RRG_IT_{num_method_1}+{num_method_2}.csv'
 
     with open(filename, 'a', newline='') as csvfile:
         csvwriter = csv.writer(csvfile)
@@ -33,8 +33,8 @@ def main():
                             'Lremote_NEXU_IT', 'Phi_NEXU[Gbps]', 'method1_times[s]', 'method1_peak_RAMs[MB]', 'method1_results[Gbps]',
                             'method2_time[s]', 'method2_attempts', 'method2_peak_RAM[MB]'])
         
-        configs = [(50,7)]
         # configs = [(16, 5), (25, 6), (36, 7), (49, 8), (64, 9), (81, 10) , (100, 11)]
+        configs = [(16, 5), (25, 6), (36, 7), (49, 8)]
         for V, D in configs:
             # various traffic patterns
             traffic_pattern = "uniform"
@@ -68,7 +68,7 @@ def main():
 
 def profile(config: tuple, traffic_pattern: str, _shift: int):
     EPR=(config[1]+1)//2
-    _network = Slimflytopo(config[0], config[1])
+    _network = RRGtopo(config[0], config[1])
     Cap_remote = 10 #GBps
     Cap_local = 10 #GBps
     M_EPs = None
@@ -110,7 +110,7 @@ def profile(config: tuple, traffic_pattern: str, _shift: int):
 
     nexu_it = Nexullance_IT(_network.nx_graph, M_R, Cap_remote)
     times_method_1, peakRAMs_method_1, time_method_2, peakRAM_method_2, results_method_1 = nexu_it.optimize_and_profile(
-    num_method_1, num_method_2, weighted_method_1, weighted_method_2, alt = True)
+    num_method_1, num_method_2, weighted_method_1, weighted_method_2, config[0], True)
 
     Lremote_NEXU_IT=nexu_it.get_result_max_link_load()
     method_2_attempts=nexu_it.get_method_2_attempts()
