@@ -54,7 +54,7 @@ def main():
             max_remote_link_load = np.max(remote_link_flows)/Cap_remote
             max_local_link_load = np.max(local_link_flows)/Cap_local
             nexu = Nexullance_IT(_network.nx_graph, gl.convert_M_EPs_to_M_R(M_EPs, V, EPR), Cap_remote)
-            _, _ = nexu.optimize(1, 6, weighted_method_1, weighted_method_2, True, V)
+            _, _ = nexu.optimize(1, 6, weighted_method_1, weighted_method_2, V)
             Lremote_NEXU = nexu.get_result_max_link_load()
             Phi = gl.network_total_throughput(M_EPs, Lremote_NEXU, max_local_link_load)
             csvwriter.writerow([V, D, EPR, traffic_pattern, Phi, Phi/(V*EPR), nexu.get_method_2_attempts()])
@@ -72,7 +72,7 @@ def main():
             max_remote_link_load = np.max(remote_link_flows)/Cap_remote
             max_local_link_load = np.max(local_link_flows)/Cap_local
             nexu = Nexullance_IT(_network.nx_graph, gl.convert_M_EPs_to_M_R(M_EPs, V, EPR), Cap_remote)
-            _, _ = nexu.optimize(1, 6, weighted_method_1, weighted_method_2, True, V)
+            _, _ = nexu.optimize(1, 6, weighted_method_1, weighted_method_2, V)
             Lremote_NEXU = nexu.get_result_max_link_load()
             Phi = gl.network_total_throughput(M_EPs, Lremote_NEXU, max_local_link_load)
             csvwriter.writerow([V, D, EPR, traffic_pattern, Phi, Phi/(V*EPR), nexu.get_method_2_attempts()])
@@ -90,7 +90,7 @@ def main():
             max_remote_link_load = np.max(remote_link_flows)/Cap_remote
             max_local_link_load = np.max(local_link_flows)/Cap_local
             nexu = Nexullance_IT(_network.nx_graph, gl.convert_M_EPs_to_M_R(M_EPs, V, EPR), Cap_remote)
-            _, _ = nexu.optimize(1, 6, weighted_method_1, weighted_method_2, True, V)
+            _, _ = nexu.optimize(1, 6, weighted_method_1, weighted_method_2, V)
             Lremote_NEXU = nexu.get_result_max_link_load()
             Phi = gl.network_total_throughput(M_EPs, Lremote_NEXU, max_local_link_load)
             csvwriter.writerow([V, D, EPR, traffic_pattern, Phi, Phi/(V*EPR), nexu.get_method_2_attempts()])
@@ -108,7 +108,7 @@ def main():
             max_remote_link_load = np.max(remote_link_flows)/Cap_remote
             max_local_link_load = np.max(local_link_flows)/Cap_local
             nexu = Nexullance_IT(_network.nx_graph, gl.convert_M_EPs_to_M_R(M_EPs, V, EPR), Cap_remote)
-            _, _ = nexu.optimize(1, 6, weighted_method_1, weighted_method_2, True, V)
+            _, _ = nexu.optimize(1, 6, weighted_method_1, weighted_method_2, V)
             Lremote_NEXU = nexu.get_result_max_link_load()
             Phi = gl.network_total_throughput(M_EPs, Lremote_NEXU, max_local_link_load)
             csvwriter.writerow([V, D, EPR, traffic_pattern, Phi, Phi/(V*EPR), nexu.get_method_2_attempts()])
@@ -126,7 +126,7 @@ def main():
             max_remote_link_load = np.max(remote_link_flows)/Cap_remote
             max_local_link_load = np.max(local_link_flows)/Cap_local
             nexu = Nexullance_IT(_network.nx_graph, gl.convert_M_EPs_to_M_R(M_EPs, V, EPR), Cap_remote)
-            _, _ = nexu.optimize(1, 6, weighted_method_1, weighted_method_2, True, V)
+            _, _ = nexu.optimize(1, 6, weighted_method_1, weighted_method_2, V)
             Lremote_NEXU = nexu.get_result_max_link_load()
             Phi = gl.network_total_throughput(M_EPs, Lremote_NEXU, max_local_link_load)
             csvwriter.writerow([V, D, EPR, traffic_pattern, Phi, Phi/(V*EPR), nexu.get_method_2_attempts()])
@@ -144,7 +144,7 @@ def main():
             max_remote_link_load = np.max(remote_link_flows)/Cap_remote
             max_local_link_load = np.max(local_link_flows)/Cap_local
             nexu = Nexullance_IT(_network.nx_graph, gl.convert_M_EPs_to_M_R(M_EPs, V, EPR), Cap_remote)
-            _, _ = nexu.optimize(1, 6, weighted_method_1, weighted_method_2, True, V)
+            _, _ = nexu.optimize(1, 6, weighted_method_1, weighted_method_2, V)
             Lremote_NEXU = nexu.get_result_max_link_load()
             Phi = gl.network_total_throughput(M_EPs, Lremote_NEXU, max_local_link_load)
             csvwriter.writerow([V, D, EPR, traffic_pattern, Phi, Phi/(V*EPR), nexu.get_method_2_attempts()])
