@@ -451,6 +451,21 @@ class Nexullance_IT:
 
     def get_method_2_attempts(self):
         return self.method_2_attempts
+    
+    def get_routing_table(self):
+        
+        # Inside this class property, the routing table is a dictionary of dictionary (to be the same as networkx)
+        # the key of the first dictionary is the source node, and the key of the second dictionary is the destination node
+        # the key of the thrid dictionary is the unique ids of paths, and the value is the weight of the path
+       
+        # output the routing table in the format of a dictionary, keys are (src, dst), values are lists of (path, weight)
+
+        _routing_table = {}
+        for (src, dst_dict) in self.routing_table.items():
+            for (dst, path_dict) in dst_dict.items():
+                _routing_table[(src, dst)] = [(self.path_id_to_path[path_id], weight) for (path_id, weight) in path_dict.items()]
+
+        return _routing_table
 
     # a weighted dijkstra algorithm to find the least-weighted path for all s-d pairs.
     def least_weighted_paths_for_all_s_d(self, _G: Graph, _weights: callable, algorithm: str) -> dict:
