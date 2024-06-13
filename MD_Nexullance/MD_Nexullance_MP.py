@@ -1,6 +1,7 @@
 import gurobipy as gp
 from gurobipy import GRB
 import networkx as nx
+import numpy as np
 
 Graph = nx.graph.Graph
 
@@ -12,10 +13,10 @@ gp_options = {
     "LICENSEID": 2411299,
 }
 
-class Nexullance_MP_MMR:
+class MD_Nexullance_MP:
     # This is a version of Nexullance_MP that optimize the routing table accroding to many different inter-router traffic demand matrices
     # Each traffic demand matrix has a weight in the cost function. The sum of all weights is 1.
-    def __init__(self, _nx_graph: Graph, path_dict: dict, _M_Rs: list, _M_R_weights: list,  _Cap_remote: float, _solver:int=0, _verbose:bool=False):
+    def __init__(self, _nx_graph: Graph, path_dict: dict, _M_Rs: list[np.ndarray], _M_R_weights: list[float],  _Cap_remote: float, _solver:int=0, _verbose:bool=False):
         # assume uniform C^{remote}
         #LP solver options:
         '''    
@@ -28,8 +29,8 @@ class Nexullance_MP_MMR:
         '''    
         self.nx_graph: Graph = _nx_graph 
         # although we use un-directed graph here, each link still has two loads on two directions as in line 57,59
-        self.M_Rs: list = _M_Rs # this is list of list of list, each sub-list is a traffic demand matrix
-        self.M_R_weights: list = _M_R_weights
+        self.M_Rs: list[np.ndarray] = _M_Rs # this is list of list of list, each sub-list is a traffic demand matrix
+        self.M_R_weights: list[float] = _M_R_weights
         assert(len(self.M_Rs) == len(self.M_R_weights) and 'length of M_R_weights should be the same as length of M_Rs')
         self.solver: int = _solver
         self.verbose: bool = _verbose
@@ -138,6 +139,6 @@ class Nexullance_MP_MMR:
             # return traffic_shared, result_link_loads, Max_load_result
         
         else:
-            print("LP failed")
             self.model.setParam(GRB.Param.OutputFlag, 1)
             self.model.printStats()
+            raise Exception("LP failed")

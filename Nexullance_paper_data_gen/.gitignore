@@ -1,2 +1,3 @@
-# white listing
 !*.csv
+# perturbations/
+# perturbations_abs/

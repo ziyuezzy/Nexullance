@@ -128,49 +128,49 @@ def calculate_data_shortest_paths(topology_instance, config):
     print(f"calculation done for {config} with shortest paths routing")
     return _result, list(topology_instance.nx_graph.edges()), paths_dict
 
-def calculate_data_shortest_paths_with_LP(topology_instance, config):
-    edge_list=list(topology_instance.nx_graph.edges())
-    _diameter=topology_instance.calculate_diameter()
-    paths_dict=topology_instance.calculate_all_shortest_paths()
+# def calculate_data_shortest_paths_with_LP(topology_instance, config):
+#     edge_list=list(topology_instance.nx_graph.edges())
+#     _diameter=topology_instance.calculate_diameter()
+#     paths_dict=topology_instance.calculate_all_shortest_paths()
 
-    _average_path_lengths, _num_paths=process_path_dict(paths_dict)
-    _average_path_length_min=min(_average_path_lengths)
-    _average_path_length_max=max(_average_path_lengths)
-    _average_path_length_mean=mean(_average_path_lengths)
-    _num_paths_min=min(_num_paths)
-    _num_paths_max=max(_num_paths)
-    _num_paths_mean=mean(_num_paths)
+#     _average_path_lengths, _num_paths=process_path_dict(paths_dict)
+#     _average_path_length_min=min(_average_path_lengths)
+#     _average_path_length_max=max(_average_path_lengths)
+#     _average_path_length_mean=mean(_average_path_lengths)
+#     _num_paths_min=min(_num_paths)
+#     _num_paths_max=max(_num_paths)
+#     _num_paths_mean=mean(_num_paths)
 
-    link_load_dict=topology_instance.distribute_uniform_flow_on_paths(paths_dict)
-    _load_dict=list(link_load_dict.values())
-    _load_min=min(_load_dict)
-    _load_max=max(_load_dict)
-    _load_mean=mean(_load_dict)
+#     link_load_dict=topology_instance.distribute_uniform_flow_on_paths(paths_dict)
+#     _load_dict=list(link_load_dict.values())
+#     _load_min=min(_load_dict)
+#     _load_max=max(_load_dict)
+#     _load_mean=mean(_load_dict)
 
-    LP_weighted_path_dict=LP_cvspy.LP_load_balancing(paths_dict, edge_list)
-    LP_weighted_link_load = topology_instance.distribute_uniform_flow_on_weighted_paths(LP_weighted_path_dict)
-    LP_load_dict=list(LP_weighted_link_load.values())
-    LP_load_min=min(LP_load_dict)
-    LP_load_max=max(LP_load_dict)
-    LP_load_mean=mean(LP_load_dict)
+#     LP_weighted_path_dict=LP_cvspy.LP_load_balancing(paths_dict, edge_list)
+#     LP_weighted_link_load = topology_instance.distribute_uniform_flow_on_weighted_paths(LP_weighted_path_dict)
+#     LP_load_dict=list(LP_weighted_link_load.values())
+#     LP_load_min=min(LP_load_dict)
+#     LP_load_max=max(LP_load_dict)
+#     LP_load_mean=mean(LP_load_dict)
     
-    # s_d_bw_dist=list(topology_instance.s_d_bw_dist(paths_dict, link_load_dict).values())
-    # s_d_bw_min=min(s_d_bw_dist)
-    # s_d_bw_max=max(s_d_bw_dist)
-    # s_d_bw_mean=mean(s_d_bw_dist)
+#     # s_d_bw_dist=list(topology_instance.s_d_bw_dist(paths_dict, link_load_dict).values())
+#     # s_d_bw_min=min(s_d_bw_dist)
+#     # s_d_bw_max=max(s_d_bw_dist)
+#     # s_d_bw_mean=mean(s_d_bw_dist)
 
-    _result={ 
-        "diameter": _diameter, 
-        "ave_path_length_statistics": [_average_path_length_min, _average_path_length_mean, _average_path_length_max],
-        "num_paths_statistics": [_num_paths_min, _num_paths_mean, _num_paths_max],
-        "link_load_statistics": [_load_min, _load_mean, _load_max],
-        "LP_weighted_link_load_statistics": [LP_load_min, LP_load_mean, LP_load_max]
-        # "s_d_bw_statistics": [s_d_bw_min, s_d_bw_mean, s_d_bw_max],
-        # "graph_edge_list": list(topology_instance.nx_graph.edges()),
-        # "paths_dict": paths_dict
-        }
-    print(f"calculation done for {config} with LP-weighted paths routing")
-    return _result, edge_list, paths_dict, LP_weighted_path_dict
+#     _result={ 
+#         "diameter": _diameter, 
+#         "ave_path_length_statistics": [_average_path_length_min, _average_path_length_mean, _average_path_length_max],
+#         "num_paths_statistics": [_num_paths_min, _num_paths_mean, _num_paths_max],
+#         "link_load_statistics": [_load_min, _load_mean, _load_max],
+#         "LP_weighted_link_load_statistics": [LP_load_min, LP_load_mean, LP_load_max]
+#         # "s_d_bw_statistics": [s_d_bw_min, s_d_bw_mean, s_d_bw_max],
+#         # "graph_edge_list": list(topology_instance.nx_graph.edges()),
+#         # "paths_dict": paths_dict
+#         }
+#     print(f"calculation done for {config} with LP-weighted paths routing")
+#     return _result, edge_list, paths_dict, LP_weighted_path_dict
 
 
 def calculate_DDF_routing(topology_instance, config):

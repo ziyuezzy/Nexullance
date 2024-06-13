@@ -6,8 +6,7 @@
 
 import os
 import sys
-sys.path.append(os.path.abspath(os.path.join(os.getcwd(), '../..')))
-sys.path.append(os.path.abspath(os.path.join(os.getcwd(), '../../..')))
+sys.path.append("/users/ziyzhang/topology-research/")
 from topologies.Slimfly import Slimflytopo
 from nexullance.Nexullance_MP import Nexullance_MP
 import globals as gl
@@ -20,7 +19,7 @@ Cap_local = 10 #GBps
 
 def main():
     # initialize output data file
-    filename = f'Slimfly.csv'
+    filename = f'Slimfly_debug.csv'
     with open(filename, 'w', newline='') as csvfile:
         csvwriter = csv.writer(csvfile)
         csvwriter.writerow(['V', 'D', 'EPR', 'traffic', 'Phi', 'Phi_per_EP'])
@@ -34,59 +33,58 @@ def main():
             ASP, _ = _network.calculate_all_shortest_paths()
             APST4, _ = _network.calculate_all_paths_within_length(4)
             ECMP_ASP = gl.ECMP(ASP)
-            traffic_pattern = "uniform"
-            M_EPs = gl.generate_uniform_traffic_pattern(V, EPR)
-            remote_link_flows, local_link_flows = _network.distribute_M_EPs_on_weighted_paths(ECMP_ASP, EPR, M_EPs)
-            max_remote_link_load = np.max(remote_link_flows)/Cap_remote
-            max_local_link_load = np.max(local_link_flows)/Cap_local
-            # adapt the traffic scaling factor to 10x saturation
-            traffic_scaling = 10.0/max(max_local_link_load, max_remote_link_load)
-            M_EPs = traffic_scaling * M_EPs
-            remote_link_flows, local_link_flows = _network.distribute_M_EPs_on_weighted_paths(ECMP_ASP, EPR, M_EPs)
-            max_remote_link_load = np.max(remote_link_flows)/Cap_remote
-            max_local_link_load = np.max(local_link_flows)/Cap_local
-            nexu = Nexullance_MP(_network.nx_graph, APST4, gl.convert_M_EPs_to_M_R(M_EPs, V, EPR), Cap_remote, 0, False)
-            nexu.init_model()
-            Lremote_NEXU, _ = nexu.solve()
-            Phi = gl.network_total_throughput(M_EPs, Lremote_NEXU, max_local_link_load)
-            csvwriter.writerow([V, D, EPR, traffic_pattern, Phi, Phi/(V*EPR)])
-            csvfile.flush()
+            # traffic_pattern = "uniform"
+            # M_EPs = gl.generate_uniform_traffic_pattern(V, EPR)
+            # remote_link_flows, local_link_flows = _network.distribute_M_EPs_on_weighted_paths(ECMP_ASP, EPR, M_EPs)
+            # max_remote_link_load = np.max(remote_link_flows)/Cap_remote
+            # max_local_link_load = np.max(local_link_flows)/Cap_local
+            # # adapt the traffic scaling factor to 10x saturation
+            # traffic_scaling = 10.0/max(max_local_link_load, max_remote_link_load)
+            # M_EPs = traffic_scaling * M_EPs
+            # remote_link_flows, local_link_flows = _network.distribute_M_EPs_on_weighted_paths(ECMP_ASP, EPR, M_EPs)
+            # max_remote_link_load = np.max(remote_link_flows)/Cap_remote
+            # max_local_link_load = np.max(local_link_flows)/Cap_local
+            # nexu = Nexullance_MP(_network.nx_graph, APST4, gl.convert_M_EPs_to_M_R(M_EPs, V, EPR), Cap_remote, 0, False)
+            # nexu.init_model()
+            # Lremote_NEXU, _ = nexu.solve()
+            # csvwriter.writerow([V, D, EPR, traffic_pattern, Phi, Phi/(V*EPR)])
+            # csvfile.flush()
 
-            traffic_pattern = "nearst-neighbour"
-            M_EPs = gl.generate_diagonal_traffic_pattern(V, EPR, 1)
-            remote_link_flows, local_link_flows = _network.distribute_M_EPs_on_weighted_paths(ECMP_ASP, EPR, M_EPs)
-            max_remote_link_load = np.max(remote_link_flows)/Cap_remote
-            max_local_link_load = np.max(local_link_flows)/Cap_local
-            # adapt the traffic scaling factor to 10x saturation
-            traffic_scaling = 10.0/max(max_local_link_load, max_remote_link_load)
-            M_EPs = traffic_scaling * M_EPs
-            remote_link_flows, local_link_flows = _network.distribute_M_EPs_on_weighted_paths(ECMP_ASP, EPR, M_EPs)
-            max_remote_link_load = np.max(remote_link_flows)/Cap_remote
-            max_local_link_load = np.max(local_link_flows)/Cap_local
-            nexu = Nexullance_MP(_network.nx_graph, APST4, gl.convert_M_EPs_to_M_R(M_EPs, V, EPR), Cap_remote, 0, False)
-            nexu.init_model()
-            Lremote_NEXU, _ = nexu.solve()
-            Phi = gl.network_total_throughput(M_EPs, Lremote_NEXU, max_local_link_load)
-            csvwriter.writerow([V, D, EPR, traffic_pattern, Phi, Phi/(V*EPR)])
-            csvfile.flush()
+            # traffic_pattern = "nearst-neighbour"
+            # M_EPs = gl.generate_diagonal_traffic_pattern(V, EPR, 1)
+            # remote_link_flows, local_link_flows = _network.distribute_M_EPs_on_weighted_paths(ECMP_ASP, EPR, M_EPs)
+            # max_remote_link_load = np.max(remote_link_flows)/Cap_remote
+            # max_local_link_load = np.max(local_link_flows)/Cap_local
+            # # adapt the traffic scaling factor to 10x saturation
+            # traffic_scaling = 10.0/max(max_local_link_load, max_remote_link_load)
+            # M_EPs = traffic_scaling * M_EPs
+            # remote_link_flows, local_link_flows = _network.distribute_M_EPs_on_weighted_paths(ECMP_ASP, EPR, M_EPs)
+            # max_remote_link_load = np.max(remote_link_flows)/Cap_remote
+            # max_local_link_load = np.max(local_link_flows)/Cap_local
+            # nexu = Nexullance_MP(_network.nx_graph, APST4, gl.convert_M_EPs_to_M_R(M_EPs, V, EPR), Cap_remote, 0, False)
+            # nexu.init_model()
+            # Lremote_NEXU, _ = nexu.solve()
+            # Phi = gl.network_total_throughput(M_EPs, Lremote_NEXU, max_local_link_load)
+            # csvwriter.writerow([V, D, EPR, traffic_pattern, Phi, Phi/(V*EPR)])
+            # csvfile.flush()
 
-            traffic_pattern = "shift_1"
-            M_EPs = gl.generate_shift_traffic_pattern(V, EPR, 1)
-            remote_link_flows, local_link_flows = _network.distribute_M_EPs_on_weighted_paths(ECMP_ASP, EPR, M_EPs)
-            max_remote_link_load = np.max(remote_link_flows)/Cap_remote
-            max_local_link_load = np.max(local_link_flows)/Cap_local
-            # adapt the traffic scaling factor to 10x saturation
-            traffic_scaling = 10.0/max(max_local_link_load, max_remote_link_load)
-            M_EPs = traffic_scaling * M_EPs
-            remote_link_flows, local_link_flows = _network.distribute_M_EPs_on_weighted_paths(ECMP_ASP, EPR, M_EPs)
-            max_remote_link_load = np.max(remote_link_flows)/Cap_remote
-            max_local_link_load = np.max(local_link_flows)/Cap_local
-            nexu = Nexullance_MP(_network.nx_graph, APST4, gl.convert_M_EPs_to_M_R(M_EPs, V, EPR), Cap_remote, 0, False)
-            nexu.init_model()
-            Lremote_NEXU, _ = nexu.solve()
-            Phi = gl.network_total_throughput(M_EPs, Lremote_NEXU, max_local_link_load)
-            csvwriter.writerow([V, D, EPR, traffic_pattern, Phi, Phi/(V*EPR)])
-            csvfile.flush()
+            # traffic_pattern = "shift_1"
+            # M_EPs = gl.generate_shift_traffic_pattern(V, EPR, 1)
+            # remote_link_flows, local_link_flows = _network.distribute_M_EPs_on_weighted_paths(ECMP_ASP, EPR, M_EPs)
+            # max_remote_link_load = np.max(remote_link_flows)/Cap_remote
+            # max_local_link_load = np.max(local_link_flows)/Cap_local
+            # # adapt the traffic scaling factor to 10x saturation
+            # traffic_scaling = 10.0/max(max_local_link_load, max_remote_link_load)
+            # M_EPs = traffic_scaling * M_EPs
+            # remote_link_flows, local_link_flows = _network.distribute_M_EPs_on_weighted_paths(ECMP_ASP, EPR, M_EPs)
+            # max_remote_link_load = np.max(remote_link_flows)/Cap_remote
+            # max_local_link_load = np.max(local_link_flows)/Cap_local
+            # nexu = Nexullance_MP(_network.nx_graph, APST4, gl.convert_M_EPs_to_M_R(M_EPs, V, EPR), Cap_remote, 0, False)
+            # nexu.init_model()
+            # Lremote_NEXU, _ = nexu.solve()
+            # Phi = gl.network_total_throughput(M_EPs, Lremote_NEXU, max_local_link_load)
+            # csvwriter.writerow([V, D, EPR, traffic_pattern, Phi, Phi/(V*EPR)])
+            # csvfile.flush()
 
             traffic_pattern = "shift_half"
             M_EPs = gl.generate_half_shift_traffic_pattern(V, EPR)

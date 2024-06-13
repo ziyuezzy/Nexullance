@@ -1,6 +1,7 @@
 import gurobipy as gp
 from gurobipy import GRB
 import networkx as nx
+import numpy as np
 
 Graph = nx.graph.Graph
 
@@ -13,7 +14,7 @@ gp_options = {
 }
 
 class Nexullance_MP:
-    def __init__(self, _nx_graph: Graph, path_dict: dict, _M_R: list, _Cap_remote: float, _solver:int=0, _verbose:bool=False):
+    def __init__(self, _nx_graph: Graph, path_dict: dict, _M_R: np.ndarray, _Cap_remote: float, _solver:int=0, _verbose:bool=False):
         # assume uniform C^{remote}
         #LP solver options:
         '''    
@@ -26,7 +27,7 @@ class Nexullance_MP:
         '''    
         self.nx_graph: Graph = _nx_graph 
         # although we use un-directed graph here, each link still has two loads on two directions as in line 57,59
-        self.M_R: list = _M_R
+        self.M_R: np.ndarray = _M_R
         self.solver: int = _solver
         self.verbose: bool = _verbose
         self.Cap_remote: float = _Cap_remote
@@ -51,7 +52,7 @@ class Nexullance_MP:
         self.path_prob = {}
         link_load_var = {}
         link_load_constr = {}
-        self.Max_load = self.model.addVar(vtype=GRB.CONTINUOUS, name='self.Max_load')
+        self.Max_load: gp.Var = self.model.addVar(vtype=GRB.CONTINUOUS, name='self.Max_load')
         for (u,v) in self.edge_list:
             link_load_var[(u, v)]=self.model.addVar(vtype=GRB.CONTINUOUS, name=f'link_load_({u},{v})')
             link_load_constr[(u, v)]= gp.LinExpr()
@@ -97,11 +98,11 @@ class Nexullance_MP:
         all_weighted_paths={}
         if self.model.status == GRB.OPTIMAL:
             print("Optimal solution found")
-            Max_load_result=self.Max_load.x
+            Max_load_result=self.Max_load.X
             if self.verbose:
                 print("LP stats:")
                 self.model.printStats() # only print out data if verbose
-                print(f'Max link load is: {self.Max_load.x}')
+                print(f'Max link load is: {self.Max_load.X}')
 
             unique_path_id=0
             for (s,d), paths in self.path_dict.items():
@@ -116,6 +117,6 @@ class Nexullance_MP:
             # return traffic_shared, result_link_loads, Max_load_result
         
         else:
-            print("LP failed")
             self.model.setParam(GRB.Param.OutputFlag, 1)
             self.model.printStats()
+            raise Exception("LP failed")

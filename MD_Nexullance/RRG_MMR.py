@@ -4,7 +4,7 @@ sys.path.append(os.path.abspath(os.path.join(os.getcwd(), '..')))
 sys.path.append(os.path.abspath(os.path.join(os.getcwd(), '../..')))
 # sys.path.append(os.path.abspath(os.path.join(os.getcwd(), '../../..')))
 from topologies.RRG import RRGtopo
-from nexullance.Nexullance_MP_MMR import Nexullance_MP_MMR
+from MD_Nexullance.MD_Nexullance_MP import MD_Nexullance_MP
 from nexullance.Nexullance_MP import Nexullance_MP
 import globals as gl
 import numpy as np
@@ -113,7 +113,7 @@ def main():
 
     M_R_weights = [1/len(M_Rs) for _ in range(len(M_Rs))]
 
-    nexu = Nexullance_MP_MMR(_network.nx_graph, MP_APST4, M_Rs, M_R_weights, Cap_remote, 0, False)
+    nexu = MD_Nexullance_MP(_network.nx_graph, MP_APST4, M_Rs, M_R_weights, Cap_remote, 0, False)
     tracemalloc.start()
     start_time = time.time()
     nexu.init_model()
