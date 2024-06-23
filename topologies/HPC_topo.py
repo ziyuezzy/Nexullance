@@ -19,6 +19,7 @@ class HPC_topo():
         from .Slimfly import Slimflytopo
         from .Equality import Equalitytopo
         from .RRG import RRGtopo
+        from .Polarfly import PFtopo
 
     @classmethod
     def get_child_classes(cls):
@@ -267,3 +268,11 @@ class HPC_topo():
         
         return
     
+    def generate_graph_arcs(self):
+        # Convert the graph to a directed graph
+        DG = self.nx_graph.to_directed()
+        # Get the list of edges
+        edges_list = list(DG.edges())
+        # Convert the list of edges to a (E, 2) np ndarray
+        edges_array = np.array(edges_list)
+        return edges_array

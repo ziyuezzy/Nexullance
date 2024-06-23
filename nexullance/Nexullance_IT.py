@@ -187,6 +187,8 @@ class Nexullance_IT:
             if (attempts>max_attempts or (len(max_link_loads) > min_attempts+1 and ((np.average(max_link_loads[-min_attempts//2:-1]) - max_link_loads[-1]) < threshold ))):
                 break
 
+            print(f"step2, it={attempts}, max_load={max_link_loads[-1]}, array length: {len(max_link_loads)}")
+
             # u, v = max(self.link_loads, key=lambda k: self.link_loads[k])
             max_keys = [key for key, value in self.link_loads.items() if value == max_link_loads[-1]]
 
