@@ -309,18 +309,20 @@ def clean_up_weighted_paths(weighted_path_dict):
         weighted_paths=[]
         check_sum=0
         for j, (path, weight) in enumerate(paths):
-            weight=round(weight, 3)
+            weight=round(weight, 4)
             if j == len(paths)-1:
-                w=round(1-check_sum, 3)
+                w=round(1-check_sum, 4)
                 assert(abs(w-weight)<0.01)
-                if weight > 0.001:
+                if weight > 0.0001:
                     weighted_paths.append((path, w))
                 else:
                     weighted_paths[-1]=(weighted_paths[-1][0],weighted_paths[-1][1]+w )
             else:
-                if weight > 0.001:
-                    check_sum += weight
+                check_sum += weight
+                if (weight > 0.0001) or (j == 0):
                     weighted_paths.append((path, weight))
+                else:
+                    weighted_paths[-1]=(weighted_paths[-1][0],weighted_paths[-1][1]+weight )
         clean_weighted_path_dict[(u,v)]=weighted_paths
     return clean_weighted_path_dict
 

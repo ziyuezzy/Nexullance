@@ -3,9 +3,8 @@ import sys
 sys.path.append(os.path.abspath(os.path.join(os.getcwd(), '../..')))
 sys.path.append(os.path.abspath(os.path.join(os.getcwd(), '../../..')))
 from topologies.RRG import RRGtopo
-# from Nexullance_IT import Nexullance_IT
-# from Nexullance_MP import Nexullance_MP
-from Nexullance_IT import Nexullance_IT
+sys.path.append("/users/ziyzhang/topology-research/nexullance/IT_boost/build")
+from Nexullance_IT_cpp import Nexullance_IT_interface
 import globals as gl
 import numpy as np
 import time
@@ -19,49 +18,43 @@ import pickle
 # 2. record time consumption
 # 3. record maximum RAM
 
-num_method_1 = 1
-num_method_2 = 6
-
 def main():
 
     # initialize output data file
-    filename = f'data_RRG_IT_{num_method_1}+{num_method_2}.csv'
+    filename = f'data_RRG_IT.csv'
 
     with open(filename, 'a', newline='') as csvfile:
         csvwriter = csv.writer(csvfile)
-        csvwriter.writerow(['V', 'D', 'traffic_pattern', 'Lremote_MAX_ECMP_ASP', 'Llocal_MAX_ECMP_ASP', 'Phi_ECMP_ASP[GBps]', 
-                            'Lremote_NEXU_IT', 'Phi_NEXU[GBps]', 'method1_times[s]', 'method1_peak_RAMs[MB]', 'method1_results[GBps]',
-                            'method2_time[s]', 'method2_attempts', 'method2_peak_RAM[MB]'])
-        
-        # configs = [(16, 5), (25, 6), (36, 7), (49, 8), (64, 9), (81, 10) , (100, 11)]
-        configs = [(16, 5), (25, 6), (36, 7), (49, 8)]
+        csvwriter.writerow(['V', 'D', 'traffic_pattern', 'Phi_NEXU[GBps]', 'solving_time[s]', 'peak_RAM[MB]'])
+        configs = [(16, 5), (25, 6), (36, 7), (49, 8), (64, 9), (81, 10) , (100, 11)]
+        # configs = [(16, 5), (25, 6)]
         for V, D in configs:
             # various traffic patterns
             traffic_pattern = "uniform"
             result = profile((V,D), traffic_pattern, 0)
-            csvwriter.writerow([V, D, traffic_pattern, result[0], result[1], result[2], result[3], result[4], result[5], result[6], result[7], result[8], result[9], result[10] ])
+            csvwriter.writerow([V, D, traffic_pattern, result[0], result[1], result[2] ])
             
             EPR=(D+1)//2
             traffic_pattern = "shift"
             result = profile((V,D), traffic_pattern, EPR)
-            csvwriter.writerow([V, D, traffic_pattern+"_1", result[0], result[1], result[2], result[3], result[4], result[5], result[6], result[7], result[8], result[9], result[10] ])
+            csvwriter.writerow([V, D, traffic_pattern+"_1", result[0], result[1], result[2] ])
             
             result = profile((V,D), traffic_pattern, EPR*V//4)
-            csvwriter.writerow([V, D, traffic_pattern+"_quater", result[0], result[1], result[2], result[3], result[4], result[5], result[6], result[7], result[8], result[9], result[10] ])
+            csvwriter.writerow([V, D, traffic_pattern+"_quater", result[0], result[1], result[2] ])
             
             result = profile((V,D), traffic_pattern, EPR*V//2)
-            csvwriter.writerow([V, D, traffic_pattern+"_half", result[0], result[1], result[2], result[3], result[4], result[5], result[6], result[7], result[8], result[9], result[10] ])
+            csvwriter.writerow([V, D, traffic_pattern+"_half", result[0], result[1], result[2] ])
             
             traffic_pattern = "diagonal"
             result = profile((V,D), traffic_pattern, EPR)
-            csvwriter.writerow([V, D, traffic_pattern+"_1", result[0], result[1], result[2], result[3], result[4], result[5], result[6], result[7], result[8], result[9], result[10] ])
+            csvwriter.writerow([V, D, traffic_pattern+"_1", result[0], result[1], result[2] ])
             
             result = profile((V,D), traffic_pattern, EPR*V//4)
-            csvwriter.writerow([V, D, traffic_pattern+"_quater", result[0], result[1], result[2], result[3], result[4], result[5], result[6], result[7], result[8], result[9], result[10] ])
+            csvwriter.writerow([V, D, traffic_pattern+"_quater", result[0], result[1], result[2] ])
             
             # diagonal half is the same as shift half
             # result = profile((V,D), traffic_pattern, EPR*V//2)
-            # csvwriter.writerow([V, D, traffic_pattern+"_half", result[0], result[1], result[2], result[3], result[4], result[5], result[6], result[7], result[8], result[9], result[10] ])
+            # csvwriter.writerow([V, D, traffic_pattern+"_half", result[0], result[1], result[2] ])
             
             csvfile.flush()
     return
@@ -84,6 +77,7 @@ def profile(config: tuple, traffic_pattern: str, _shift: int):
 
     # apply simple ECMP:
     ASP, _ = _network.calculate_all_shortest_paths()
+    arcs = _network.generate_graph_arcs()
     ECMP = gl.ECMP(ASP)
     remote_link_flows, local_link_flows = _network.distribute_M_EPs_on_weighted_paths(ECMP, EPR, M_EPs)
     max_remote_link_load = np.max(remote_link_flows)/Cap_remote
@@ -99,27 +93,28 @@ def profile(config: tuple, traffic_pattern: str, _shift: int):
     # print("Max local link load: ", max_local_link_load)
     ECMP_Phi=gl.network_total_throughput(M_EPs, max_remote_link_load, max_local_link_load)
 
-    alpha_1 = 40.0
-    beta_1 = 0.4
-    alpha_2 = 3
-    beta_2 = 7
-    def weighted_method_1(s: int, d: int, edge_attributes: dict):
-        return alpha_1 + edge_attributes['load']**beta_1
-    def weighted_method_2(s: int, d: int, edge_attributes: dict):
-        return alpha_2 + edge_attributes['load']**beta_2
+    ave_peak_RAM = 0
+    ave_time = 0
+    reptition = 10
+    for i in range(reptition):
+        tracemalloc.start()
+        # run Nexullance_IT
+        nexu_it = Nexullance_IT_interface(config[0], arcs, M_R, False)
+        start_time = time.time()
+        nexu_it.run()
+        end_time = time.time()
+        time_IT = end_time - start_time
+        peak_RAM = tracemalloc.get_traced_memory()[1]
+        tracemalloc.stop()
+        ave_peak_RAM += peak_RAM
+        ave_time += time_IT
+    ave_peak_RAM /= reptition
+    ave_time /= reptition
 
-    nexu_it = Nexullance_IT(_network.nx_graph, M_R, Cap_remote)
-    times_method_1, peakRAMs_method_1, time_method_2, peakRAM_method_2, results_method_1 = nexu_it.optimize_and_profile(
-    num_method_1, num_method_2, weighted_method_1, weighted_method_2, config[0], True)
-
-    Lremote_NEXU_IT=nexu_it.get_result_max_link_load()
-    method_2_attempts=nexu_it.get_method_2_attempts()
+    Lremote_NEXU_IT=nexu_it.get_max_link_load()
     Phi_NEXU_IT = gl.network_total_throughput(M_EPs, Lremote_NEXU_IT, max_local_link_load)
-    results_method_1 = [gl.network_total_throughput(M_EPs, results_method_1[i], max_local_link_load) for i in range(len(results_method_1))]
-
-    return [max_remote_link_load, max_local_link_load, ECMP_Phi, Lremote_NEXU_IT, Phi_NEXU_IT, 
-            times_method_1, [x/1E6 for x in peakRAMs_method_1], results_method_1,
-            time_method_2, method_2_attempts, peakRAM_method_2/1E6]
+    
+    return [Phi_NEXU_IT, ave_time, ave_peak_RAM/1E6]
 
 if __name__ == '__main__':
     main()

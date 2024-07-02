@@ -108,6 +108,12 @@ class MD_Nexullance_MP:
         # Set objective
         self.model.setObjective(self.weighted_Max_load, GRB.MINIMIZE)
 
+    def get_weighted_Max_load(self):
+        if self.model.status == GRB.OPTIMAL:
+            return self.weighted_Max_load.X
+        else:
+            raise Exception("did not solve LP, or LP failed")
+    
     def solve(self):
         self.model.optimize()
         # traffic_shared = {} #{(s, d): {link (i->j): shared value}}

@@ -13,7 +13,7 @@ gp_options = {
 }
 
 class Nexullance_OPT:
-    def __init__(self, _nx_graph: Graph, _M_R: list, _Cap_remote: float, _solver:int=0, _verbose:bool=False):
+    def __init__(self, _nx_graph: Graph, _M_R, _Cap_remote: float, _solver:int=0, _verbose:bool=False):
         # assume uniform C^{remote}
         #LP solver options:
         '''    
