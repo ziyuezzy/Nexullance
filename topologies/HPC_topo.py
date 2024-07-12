@@ -184,7 +184,7 @@ class HPC_topo():
                     for j, (path, weight) in enumerate(weighted_paths):
                         if j == len(weighted_paths)-1:
                             w=1-check_sum
-                            assert(abs(w-weight)<0.01) # rounding errors should be small
+                            assert(abs(w-weight)<0.001) # rounding errors should be small
                             for i in range(len(path) - 1):
                                 vertex1, vertex2 = path[i], path[i + 1]
                                 link_flows[(vertex1, vertex2)] += w*M_R[u][v]
@@ -194,12 +194,13 @@ class HPC_topo():
                                 link_flows[(vertex1, vertex2)] += weight*M_R[u][v]
                             check_sum += weight
 
-        link_flows = [ v for v in link_flows.values()]
         return link_flows
         
     def distribute_M_EPs_on_weighted_paths(self, weighted_path_dict, EPR, M_EPs):
         M_R = convert_M_EPs_to_M_R(M_EPs, self.nx_graph.number_of_nodes(), EPR)
-        remote_link_flows: list = self.distribute_M_R_on_weighted_paths(weighted_path_dict, M_R)
+        remote_link_flows = self.distribute_M_R_on_weighted_paths(weighted_path_dict, M_R)
+        remote_link_flows = [ v for v in remote_link_flows.values()]
+
         local_link_flows: list = local_link_flows_from_M_EPs(M_EPs)
         return remote_link_flows, local_link_flows
         

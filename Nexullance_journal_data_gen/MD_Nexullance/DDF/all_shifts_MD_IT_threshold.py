@@ -12,7 +12,7 @@ import numpy as np
 import pickle
 import csv
 import time
-import tracemalloc
+# import tracemalloc
 import pandas as pd
 
 Cap_remote = 10 #GBps
@@ -61,48 +61,33 @@ def main():
         M_R_names.append(f"shift_{_shift}")
     M_R_weights = [1/len(M_Rs) for _ in range(len(M_Rs))]
 
+    Thresholds = [-0.0001, 0.0, 0.0001, 0.001, 0.01, 0.1, 1.0]
+    Time_data = []
+    obj_data = []
 
-    df:pd.DataFrame = pd.read_csv("/users/ziyzhang/topology-research/Nexullance_journal_data_gen/MD_Nexullance/DDF/DDF_36_5_MD_all_shifts.csv")
+    for threshold in Thresholds:
 
-    #====================================
-    # calculate Phi for MD_Nexullance_IT routing
-    md_nexu_it = MD_Nexullance_IT_interface(V, arcs, M_Rs, M_R_weights, True)
+        # calculate Phi for MD_Nexullance_IT routing
+        md_nexu_it = MD_Nexullance_IT_interface(V, arcs, M_Rs, M_R_weights, False)
+        # tracemalloc.start()
+        start_time = time.time()
+        md_nexu_it.run(4, threshold, 20000, True)
+        end_time = time.time()
+        # MD_peak_RAM = tracemalloc.get_traced_memory()[1]/1024/1024
+        MD_time = end_time-start_time
+        # tracemalloc.stop()
 
-    # md_nexu_it.set_parameters(10.0, 1.0)
-    tracemalloc.start()
-    start_time = time.time()
-    md_nexu_it.run(4, 0.0001, 20000, True)
-    end_time = time.time()
-    MD_peak_RAM = tracemalloc.get_traced_memory()[1]/1024/1024
-    MD_time = end_time-start_time
-    tracemalloc.stop()
+        Time_data.append(MD_time)
+        obj_data.append(md_nexu_it.get_weighted_max_link_load())
 
-    print("resulting weighted max load from MD_Nexullance_IT = ", md_nexu_it.get_weighted_max_link_load())
-    print("MD_Nexullance_IT computing time = ", MD_time, " s")
-    print("MD_Nexullance_IT peak RAM = ", MD_peak_RAM, " MB")
-    Lremote_for_MRs = md_nexu_it.get_max_link_loads()
-    print("average path length: ",md_nexu_it.get_average_path_length())
-    MD_IT_Phis = []
-    for i, M_EP in enumerate(M_EPs):
-        # print("shift_",{_shift}, " max remote link load for MD_Nexullance_IT = ", Lremote_for_MRs[i])
-        MD_IT_Phis.append(gl.network_total_throughput(M_EP, Lremote_for_MRs[i], max_local_link_loads[i]))
-
-    # pickle output routing tables
-    routing_name = f"MD_NEXU_IT_all_shifts"
-    pathdict_file=f"{routing_name}_({V},{D})DDFtopo_paths.pickle"
-    with open(pathdict_file, 'wb') as handle:
-        pickle.dump(gl.clean_up_weighted_paths(md_nexu_it.get_routing_table()), handle)
-    #====================================
-
-    for i in range(len(M_EPs)):
-        traffic_name = M_R_names[i]
-        df.loc[df["included_M_R"] == traffic_name, "Phi_MD_IT"] = MD_IT_Phis[i]
-
-        df["MD_IT_to_IT"] = df["Phi_MD_IT"]/df["Phi_IT"]
-        df["MD_IT_to_MP"] = df["Phi_MD_IT"]/df["Phi_MP"]
-
-    filename = f'DDF_{V}_{D}_MD_all_shifts_IT_testing.csv'
-    df.to_csv(filename, index=False)
+    filename = f'DDF_{V}_{D}_MD_all_shifts_sweep_threshold.csv'
+    # save data to csv file
+    with open(filename, 'a', newline='') as csvfile:
+        csvwriter = csv.writer(csvfile)
+        csvwriter.writerow(['threshold', 'time[s]', 'objective_func']) # TODO: number of steps
+        csvfile.flush()
+        for i, threshold in enumerate(Thresholds):
+            csvwriter.writerow([threshold, Time_data[i], obj_data[i]])
 
 if __name__ == '__main__':
     main()

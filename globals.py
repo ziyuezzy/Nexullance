@@ -326,6 +326,12 @@ def clean_up_weighted_paths(weighted_path_dict):
         clean_weighted_path_dict[(u,v)]=weighted_paths
     return clean_weighted_path_dict
 
+def cal_weighted_ave_path_length(weighted_path_dict):
+    ave_path_length=0
+    for (u,v), paths in weighted_path_dict.items():
+        for path, weight in paths:
+            ave_path_length += weight*len(path)
+    return ave_path_length/len(weighted_path_dict)
 
 def generate_uniform_traffic_pattern(num_routers, EPR):
     total_num_EP=EPR*num_routers
