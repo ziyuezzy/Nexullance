@@ -13,7 +13,7 @@ nexullance/bin
 # *.csv
 *.graphml
 *.austin
-
+Nexullance_journal_data_gen
 
 # white listing
 !nexullance/*.ipynb
